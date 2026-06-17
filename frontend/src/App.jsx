@@ -10,6 +10,15 @@ import SearchPage from './pages/Search.jsx'
 import Watch from './pages/Watch.jsx'
 import Watchlist from './pages/Watchlist.jsx'
 import History from './pages/History.jsx'
+import AdminDashboard from './adminpages/admindashboard.jsx'
+import AdminUser from './adminpages/adminuser.jsx'
+import AdminUserDetail from './adminpages/adminuserdetail.jsx'
+import AdminMovies from './adminpages/adminmovies.jsx'
+import AdminMovieDetail from './adminpages/adminmoviedetail.jsx'
+import AdminPayment from './adminpages/adminpayment.jsx'
+import AdminAnalytics from './adminpages/adminalytics.jsx'
+import AdminGenres from './adminpages/admingenres.jsx'
+import { AdminRoute } from './components/AdminRoute.jsx'
 
 const App = () => {
   return (
@@ -27,6 +36,53 @@ const App = () => {
           <Route path="register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Route>
+        
+        {/* Admin Routes - without standard Layout */}
+        <Route path="/admin/dashboard" element={
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        } />
+        <Route path="/admin/users" element={
+          <AdminRoute>
+            <AdminUser />
+          </AdminRoute>
+        } />
+        <Route path="/admin/users/:id" element={
+          <AdminRoute>
+            <AdminUserDetail />
+          </AdminRoute>
+        } />
+        <Route path="/admin/movies" element={
+          <AdminRoute>
+            <AdminMovies />
+          </AdminRoute>
+        } />
+        <Route path="/admin/movies/:id" element={
+          <AdminRoute>
+            <AdminMovieDetail />
+          </AdminRoute>
+        } />
+        <Route path="/admin/payments" element={
+          <AdminRoute>
+            <AdminPayment />
+          </AdminRoute>
+        } />
+        <Route path="/admin/analytics" element={
+          <AdminRoute>
+            <AdminAnalytics />
+          </AdminRoute>
+        } />
+        <Route path="/admin/genres" element={
+          <AdminRoute>
+            <AdminGenres />
+          </AdminRoute>
+        } />
+        <Route path="/admin/categories" element={
+          <AdminRoute>
+            <AdminGenres />
+          </AdminRoute>
+        } />
       </Routes>
     </BrowserRouter>
   )

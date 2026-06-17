@@ -32,8 +32,8 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    // Nếu token hết hạn (401) và chưa retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Nếu token hết hạn (401) hoặc bị từ chối (403) và chưa retry
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
       originalRequest._retry = true
 
       try {

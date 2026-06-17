@@ -16,10 +16,19 @@ const Login = () => {
 
     try {
       // Backend LoginRequest chỉ yêu cầu email và password
-      await authService.login({ email, password })
+      const response = await authService.login({ email, password })
       
-      // Đăng nhập thành công, chuyển hướng về trang chủ
-      navigate('/')
+      const user = response.user;
+      const isAdmin = user?.role === 'ADMIN' || user?.role === 'ROLE_ADMIN' || 
+                      user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN') ||
+                      user?.authorities?.some(a => a.authority === 'ROLE_ADMIN');
+
+      // Đăng nhập thành công, chuyển hướng về trang chủ hoặc dashboard
+      if (isAdmin) {
+        navigate('/admin/dashboard')
+      } else {
+        navigate('/')
+      }
     } catch (err) {
       console.error('Login error:', err)
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.')
