@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminTaskbar from './admintaskbar.jsx';
 import { adminService } from '../../services';
+import { useToast, ToastContainer } from '../../components/Toast.jsx';
 
 const AdminUser = () => {
+    const { toasts, showToast, closeToast } = useToast();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
@@ -106,7 +108,7 @@ const AdminUser = () => {
                 fetchUsers();
             } catch (err) {
                 console.error(`Error ${action}ing user`, err);
-                alert(`Failed to ${action} user`);
+                showToast('error', `Không thể ${action === 'disable' ? 'vô hiệu hóa' : 'kích hoạt'} tài khoản.`);
             }
         }
     };
@@ -119,7 +121,7 @@ const AdminUser = () => {
                 fetchUsers();
             } catch (err) {
                 console.error('Error changing user role', err);
-                alert('Failed to change role');
+                showToast('error', 'Thay đổi quyền người dùng thất bại.');
             }
         }
     };
@@ -156,7 +158,7 @@ const AdminUser = () => {
             fetchUsers();
         } catch (err) {
             console.error("Failed to update user:", err);
-            alert("Failed to update user");
+            showToast('error', 'Cập nhật người dùng thất bại.');
         } finally {
             setSaving(false);
         }
@@ -167,6 +169,7 @@ const AdminUser = () => {
             className="bg-[#0F172A] text-[#ffdad5] text-[14px] leading-[20px] min-h-screen flex antialiased"
             style={{ fontFamily: 'Inter, sans-serif' }}
         >
+            <ToastContainer toasts={toasts} onClose={closeToast} />
             <AdminTaskbar />
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col md:ml-64 w-full min-h-screen">

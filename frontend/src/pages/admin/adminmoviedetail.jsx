@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminTaskbar from './admintaskbar.jsx';
 import { adminService } from '../../services';
+import { useToast, ToastContainer } from '../../components/Toast.jsx';
 
 const AdminMovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toasts, showToast, closeToast } = useToast();
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -74,7 +76,7 @@ const AdminMovieDetail = () => {
       voteCount: movie.voteCount || '',
       trailerUrl: movie.trailerUrl || '',
       genreIds: movie.genres ? movie.genres.map(g => g.id) : [],
-      categoryIds: movie.categories || []
+      categoryIds: movie.categories ? movie.categories.map(c => typeof c === 'object' && c !== null ? (c.categoryId || c.category_id) : c).filter(id => id != null) : []
     });
     setIsEditModalOpen(true);
   };
@@ -117,12 +119,12 @@ const AdminMovieDetail = () => {
       };
 
       const updated = await adminService.updateMovie(movieForm.tmdbId, data);
-      alert('Movie updated successfully!');
+      showToast('success', 'Cập nhật phim thành công!');
       setMovie(updated);
       setIsEditModalOpen(false);
     } catch (err) {
       console.error('Error saving movie details:', err);
-      alert(err?.response?.data?.message || 'Failed to save movie details.');
+      showToast('error', err?.response?.data?.message || 'Lưu thông tin phim thất bại.');
     } finally {
       setSaving(false);
     }
@@ -143,13 +145,14 @@ const AdminMovieDetail = () => {
       }
     } catch (error) {
       console.error('Error toggling movie status:', error);
-      alert('Failed to update movie status');
+      showToast('error', 'Không thể cập nhật trạng thái phim.');
     }
   };
 
   if (loading) {
     return (
       <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <ToastContainer toasts={toasts} onClose={closeToast} />
         <AdminTaskbar />
         <main className="flex-1 md:ml-64 min-h-screen flex items-center justify-center">
           <div className="text-[#94A3B8]">Loading movie details...</div>
@@ -172,6 +175,7 @@ const AdminMovieDetail = () => {
 
   return (
     <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <ToastContainer toasts={toasts} onClose={closeToast} />
       {/* Sidebar */}
       <AdminTaskbar />
       
@@ -329,7 +333,7 @@ const AdminMovieDetail = () => {
                   <div className="flex flex-wrap gap-[8px]">
                     {movie.categories && movie.categories.length > 0 ? (
                       movie.categories.map(cat => (
-                        <span key={cat} className="px-3 py-1 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#3b82f6]/30 text-[12px] font-medium tracking-wide capitalize hover:bg-[#3b82f6]/30 cursor-pointer" onClick={handleOpenEditModal}>{cat}</span>
+                        <span key={cat.categoryId || cat.category_id} className="px-3 py-1 rounded bg-[#3b82f6]/20 text-[#60a5fa] border border-[#3b82f6]/30 text-[12px] font-medium tracking-wide capitalize hover:bg-[#3b82f6]/30 cursor-pointer" onClick={handleOpenEditModal}>{cat.name}</span>
                       ))
                     ) : (
                       <span className="text-[#94A3B8] text-sm">No categories assigned</span>
@@ -509,17 +513,20 @@ const AdminMovieDetail = () => {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Categories</label>
                   <div className="bg-[#0F172A] border border-[#334155] rounded-lg p-3 max-h-[150px] overflow-y-auto space-y-2">
-                    {allCategories.map(cat => (
-                      <label key={cat.id} className="flex items-center gap-2 text-xs text-[#f8fafc] cursor-pointer hover:text-white">
-                        <input 
-                          type="checkbox" 
-                          checked={movieForm.categoryIds.includes(cat.id)}
-                          onChange={() => handleCategoryCheckboxChange(cat.id)}
-                          className="accent-[#E50914]"
-                        />
-                        <span className="capitalize">{cat.name}</span>
-                      </label>
-                    ))}
+                    {allCategories.map(cat => {
+                      const catId = cat.categoryId || cat.category_id;
+                      return (
+                        <label key={catId} className="flex items-center gap-2 text-xs text-[#f8fafc] cursor-pointer hover:text-white">
+                          <input 
+                            type="checkbox" 
+                            checked={movieForm.categoryIds.includes(catId)}
+                            onChange={() => handleCategoryCheckboxChange(catId)}
+                            className="accent-[#E50914]"
+                          />
+                          <span className="capitalize">{cat.name}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

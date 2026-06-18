@@ -3,9 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import AdminTaskbar from './admintaskbar.jsx';
 import { adminService } from '../../services';
 import Spinner from '../../components/Spinner.jsx';
+import { useToast, ToastContainer } from '../../components/Toast.jsx';
 
 const AdminUserDetail = () => {
     const { id } = useParams();
+    const { toasts, showToast, closeToast } = useToast();
     const [activeTab, setActiveTab] = useState('payment');
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ const AdminUserDetail = () => {
                 await adminService.changeUserRole(id, newRole);
                 setUser(prev => ({ ...prev, role: newRole }));
             } catch (err) {
-                alert("Failed to change role");
+                showToast('error', 'Thay đổi quyền người dùng thất bại.');
             }
         }
     };
@@ -77,7 +79,7 @@ const AdminUserDetail = () => {
                 }
                 await fetchUserDetail();
             } catch (err) {
-                alert(`Failed to ${action} account`);
+                showToast('error', `Không thể ${action === 'disable' ? 'vô hiệu hóa' : 'kích hoạt'} tài khoản.`);
             }
         }
     };
@@ -89,7 +91,7 @@ const AdminUserDetail = () => {
                 fullName: editFullName,
                 adminNotes: editAdminNotes
             });
-            alert('User profile updated successfully!');
+            showToast('success', 'Cập nhật thông tin người dùng thành công!');
             setUser(prev => ({
                 ...prev,
                 fullName: updated.fullName,
@@ -97,7 +99,7 @@ const AdminUserDetail = () => {
             }));
         } catch (err) {
             console.error("Failed to update user profile", err);
-            alert('Failed to update user profile');
+            showToast('error', 'Cập nhật thông tin người dùng thất bại.');
         } finally {
             setSaving(false);
         }
@@ -109,6 +111,7 @@ const AdminUserDetail = () => {
 
     return (
         <div className="bg-[#0F172A] text-[#f8fafc] font-['Inter'] min-h-screen flex antialiased">
+            <ToastContainer toasts={toasts} onClose={closeToast} />
             {/* SideNavBar */}
             <AdminTaskbar />
 

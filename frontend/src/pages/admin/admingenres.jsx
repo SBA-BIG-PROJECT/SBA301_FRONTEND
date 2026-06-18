@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import AdminTaskbar from './admintaskbar.jsx';
 import { adminService } from '../../services';
+import { useToast, ToastContainer } from '../../components/Toast.jsx';
 
 const AdminGenres = () => {
+  const { toasts, showToast, closeToast } = useToast();
   const [genres, setGenres] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +51,7 @@ const AdminGenres = () => {
       setShowGenreModal(false);
     } catch (err) {
       console.error('Error creating genre:', err);
-      alert('Failed to create genre');
+      showToast('error', 'Tạo thể loại thất bại.');
     }
   };
 
@@ -63,7 +65,7 @@ const AdminGenres = () => {
       setShowCategoryModal(false);
     } catch (err) {
       console.error('Error creating category:', err);
-      alert('Failed to create category');
+      showToast('error', 'Tạo danh mục thất bại.');
     }
   };
 
@@ -74,7 +76,7 @@ const AdminGenres = () => {
         setGenres(genres.filter(g => g.id !== id));
       } catch (err) {
         console.error('Error deleting genre:', err);
-        alert('Failed to delete genre');
+        showToast('error', 'Xóa thể loại thất bại.');
       }
     }
   };
@@ -86,13 +88,14 @@ const AdminGenres = () => {
         setCategories(categories.filter(c => c.id !== id));
       } catch (err) {
         console.error('Error deleting category:', err);
-        alert('Failed to delete category');
+        showToast('error', 'Xóa danh mục thất bại.');
       }
     }
   };
 
   return (
     <div className="bg-[#0F172A] text-[#f8fafc] font-['Inter'] min-h-screen flex antialiased">
+      <ToastContainer toasts={toasts} onClose={closeToast} />
       {/* SideNavBar */}
       <AdminTaskbar />
 

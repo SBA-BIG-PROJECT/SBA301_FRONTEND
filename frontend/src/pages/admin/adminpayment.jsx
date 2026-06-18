@@ -10,7 +10,8 @@ const AdminPayment = () => {
   const [size] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [stats, setStats] = useState(null);
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [revenueStats, setRevenueStats] = useState(null);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState('all');
@@ -73,8 +74,12 @@ const AdminPayment = () => {
 
   const fetchStats = async () => {
     try {
-      const data = await adminService.getRevenueAnalytics();
-      setStats(data);
+      const [dashData, revData] = await Promise.all([
+        adminService.getDashboardStats(),
+        adminService.getRevenueAnalytics()
+      ]);
+      setDashboardStats(dashData);
+      setRevenueStats(revData);
     } catch (err) {
       console.error('Error fetching stats:', err);
     }
@@ -154,7 +159,7 @@ const AdminPayment = () => {
               <p className="text-[12px] font-medium text-[#94A3B8] uppercase">Total Revenue (30d)</p>
               <div className="flex items-end justify-between">
                 <h3 className="text-[24px] font-bold leading-none text-[#f8fafc]">
-                  {stats ? formatCurrency(stats.revenueThisMonth) : '$0'}
+                  {revenueStats ? formatCurrency(revenueStats.totalRevenue) : '$0'}
                 </h3>
               </div>
             </div>
@@ -162,7 +167,7 @@ const AdminPayment = () => {
               <p className="text-[12px] font-medium text-[#94A3B8] uppercase">Successful Txns</p>
               <div className="flex items-end justify-between">
                 <h3 className="text-[24px] font-bold leading-none text-[#f8fafc]">
-                  {stats?.successfulPayments || 0}
+                  {dashboardStats?.successfulPayments || 0}
                 </h3>
               </div>
             </div>
@@ -170,7 +175,7 @@ const AdminPayment = () => {
               <p className="text-[12px] font-medium text-[#94A3B8] uppercase">Pending Txns</p>
               <div className="flex items-end justify-between">
                 <h3 className="text-[24px] font-bold leading-none text-[#f8fafc]">
-                  {stats?.pendingPayments || 0}
+                  {dashboardStats?.pendingPayments || 0}
                 </h3>
               </div>
             </div>
@@ -178,7 +183,7 @@ const AdminPayment = () => {
               <p className="text-[12px] font-medium text-[#94A3B8] uppercase">Active Subs</p>
               <div className="flex items-end justify-between">
                 <h3 className="text-[24px] font-bold leading-none text-[#f8fafc]">
-                  {stats?.premiumUsers || 0}
+                  {dashboardStats?.premiumUsers || 0}
                 </h3>
                 <span className="material-symbols-outlined text-[#94A3B8] opacity-50 text-[32px]">group</span>
               </div>

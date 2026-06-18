@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminTaskbar from './admintaskbar.jsx';
 import adminService from '../../services/adminService';
+import { useToast, ToastContainer } from '../../components/Toast.jsx';
 
 const AdminMovies = () => {
+  const { toasts, showToast, closeToast } = useToast();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -149,7 +151,7 @@ const AdminMovies = () => {
       voteCount: movie.voteCount || '',
       trailerUrl: movie.trailerUrl || '',
       genreIds: movie.genres ? movie.genres.map(g => g.id) : [],
-      categoryIds: movie.categories || []
+      categoryIds: movie.categories ? movie.categories.map(c => typeof c === 'object' && c !== null ? (c.categoryId || c.category_id) : c).filter(id => id != null) : []
     });
     setIsEditMode(true);
     setIsModalOpen(true);
@@ -195,17 +197,17 @@ const AdminMovies = () => {
 
       if (isEditMode) {
         await adminService.updateMovie(movieForm.tmdbId, data);
-        alert('Movie updated successfully!');
+        showToast('success', 'Cập nhật phim thành công!');
       } else {
         await adminService.createMovie(data);
-        alert('Movie created successfully!');
+        showToast('success', 'Thêm phim mới thành công!');
       }
 
       setIsModalOpen(false);
       fetchMovies();
     } catch (err) {
       console.error('Error saving movie:', err);
-      alert(err?.response?.data?.message || 'Failed to save movie.');
+      showToast('error', err?.response?.data?.message || 'Lưu phim thất bại.');
     } finally {
       setSaving(false);
     }
@@ -226,12 +228,13 @@ const AdminMovies = () => {
       }
     } catch (err) {
       console.error('Error toggling movie status:', err);
-      alert('Failed to update movie status');
+      showToast('error', 'Không thể cập nhật trạng thái phim.');
     }
   };
 
   return (
     <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <ToastContainer toasts={toasts} onClose={closeToast} />
       {/* Sidebar */}
       <AdminTaskbar />
       
@@ -615,17 +618,20 @@ const AdminMovies = () => {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Categories</label>
                   <div className="bg-[#0F172A] border border-[#334155] rounded-lg p-3 max-h-[150px] overflow-y-auto space-y-2">
-                    {allCategories.map(cat => (
-                      <label key={cat.id} className="flex items-center gap-2 text-xs text-[#f8fafc] cursor-pointer hover:text-white">
-                        <input 
-                          type="checkbox" 
-                          checked={movieForm.categoryIds.includes(cat.id)}
-                          onChange={() => handleCategoryCheckboxChange(cat.id)}
-                          className="accent-[#E50914]"
-                        />
-                        <span className="capitalize">{cat.name}</span>
-                      </label>
-                    ))}
+                    {allCategories.map(cat => {
+                      const catId = cat.categoryId || cat.category_id;
+                      return (
+                        <label key={catId} className="flex items-center gap-2 text-xs text-[#f8fafc] cursor-pointer hover:text-white">
+                          <input 
+                            type="checkbox" 
+                            checked={movieForm.categoryIds.includes(catId)}
+                            onChange={() => handleCategoryCheckboxChange(catId)}
+                            className="accent-[#E50914]"
+                          />
+                          <span className="capitalize">{cat.name}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
