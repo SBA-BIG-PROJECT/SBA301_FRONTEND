@@ -61,7 +61,7 @@ const AdminUserDetail = () => {
                 await adminService.changeUserRole(id, newRole);
                 setUser(prev => ({ ...prev, role: newRole }));
             } catch (err) {
-                showToast('error', 'Thay đổi quyền người dùng thất bại.');
+                showToast('error', 'Failed to change user role.');
             }
         }
     };
@@ -79,7 +79,7 @@ const AdminUserDetail = () => {
                 }
                 await fetchUserDetail();
             } catch (err) {
-                showToast('error', `Không thể ${action === 'disable' ? 'vô hiệu hóa' : 'kích hoạt'} tài khoản.`);
+                showToast('error', `Cannot ${action === 'disable' ? 'disable' : 'activate'} account.`);
             }
         }
     };
@@ -91,7 +91,7 @@ const AdminUserDetail = () => {
                 fullName: editFullName,
                 adminNotes: editAdminNotes
             });
-            showToast('success', 'Cập nhật thông tin người dùng thành công!');
+            showToast('success', 'User information updated successfully!');
             setUser(prev => ({
                 ...prev,
                 fullName: updated.fullName,
@@ -99,7 +99,7 @@ const AdminUserDetail = () => {
             }));
         } catch (err) {
             console.error("Failed to update user profile", err);
-            showToast('error', 'Cập nhật thông tin người dùng thất bại.');
+            showToast('error', 'Failed to update user information.');
         } finally {
             setSaving(false);
         }

@@ -2,11 +2,11 @@ import apiClient from './api'
 
 /**
  * Watchlist Service
- * Xử lý các API liên quan đến watchlist
+ * Handle API calls related to watchlist
  */
 const watchlistService = {
   /**
-   * Thêm movie vào watchlist
+   * Add movie to watchlist
    * POST /watchlist/{movieId}
    * @param {number} movieId
    * @returns {Promise} WatchlistDto
@@ -17,7 +17,7 @@ const watchlistService = {
   },
 
   /**
-   * Lấy danh sách watchlist của user
+   * Get user's watchlist
    * GET /watchlist
    * @param {Object} params - { page, size }
    * @returns {Promise} PageResponse<WatchlistDto>
@@ -30,7 +30,7 @@ const watchlistService = {
   },
 
   /**
-   * Kiểm tra movie có trong watchlist không
+   * Check if movie is in watchlist
    * GET /watchlist/check/{movieId}
    * @param {number} movieId
    * @returns {Promise} { isInWatchlist: boolean }
@@ -41,7 +41,7 @@ const watchlistService = {
   },
 
   /**
-   * Xóa movie khỏi watchlist
+   * Remove movie from watchlist
    * DELETE /watchlist/{movieId}
    * @param {number} movieId
    * @returns {Promise}

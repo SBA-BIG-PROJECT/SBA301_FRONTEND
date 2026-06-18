@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { authService } from '../services'
 
 /**
- * Custom hook để quản lý authentication
+ * Custom hook to manage authentication
  */
 export const useAuth = () => {
   const [user, setUser] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Load user từ localStorage khi component mount
+  // Load user from localStorage when component mounts
   useEffect(() => {
     const currentUser = authService.getCurrentUser()
     const authenticated = authService.isAuthenticated()
@@ -19,7 +19,7 @@ export const useAuth = () => {
     setLoading(false)
   }, [])
 
-  // Đăng ký
+  // Register
   const register = useCallback(async (data) => {
     try {
       const response = await authService.register(data)
@@ -31,7 +31,7 @@ export const useAuth = () => {
     }
   }, [])
 
-  // Đăng nhập
+  // Login
   const login = useCallback(async (credentials) => {
     try {
       const response = await authService.login(credentials)
@@ -43,7 +43,7 @@ export const useAuth = () => {
     }
   }, [])
 
-  // Đăng xuất
+  // Logout
   const logout = useCallback(async () => {
     try {
       const refreshToken = localStorage.getItem('refresh_token')
@@ -53,7 +53,7 @@ export const useAuth = () => {
       setUser(null)
       setIsAuthenticated(false)
     } catch (error) {
-      // Vẫn xóa local data nếu có lỗi
+      // Still clear local data if there's an error
       setUser(null)
       setIsAuthenticated(false)
       throw error

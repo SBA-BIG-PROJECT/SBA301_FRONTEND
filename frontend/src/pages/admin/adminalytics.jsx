@@ -25,7 +25,7 @@ const AdminAnalytics = () => {
         setRevenueAnalytics(revenueData);
       } catch (err) {
         console.error('Error fetching analytics:', err);
-        setError('Không thể tải dữ liệu analytics.');
+        setError('Could not load analytics data.');
       } finally {
         setLoading(false);
       }
@@ -66,7 +66,7 @@ const AdminAnalytics = () => {
           {loading ? (
             <div className="flex justify-center py-20 text-[#94A3B8]">
               <span className="material-symbols-outlined animate-spin mr-2 align-middle">progress_activity</span>
-              Đang tải dữ liệu analytics...
+              Loading analytics data...
             </div>
           ) : error ? (
             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
@@ -78,10 +78,10 @@ const AdminAnalytics = () => {
               {/* Summary KPI row */}
               <section className="grid grid-cols-2 md:grid-cols-4 gap-[16px]">
                 {[
-                  { label: 'Tổng lượt xem', value: formatNumber(dashboardStats?.totalViews), icon: 'visibility', color: '#7bd0ff' },
-                  { label: 'Tổng đánh giá', value: formatNumber(dashboardStats?.totalReviews), icon: 'rate_review', color: '#4ade80' },
-                  { label: 'Phim đang hoạt động', value: formatNumber(dashboardStats?.activeMovies), icon: 'movie', color: '#f87171' },
-                  { label: 'Tổng doanh thu', value: formatCurrency(dashboardStats?.totalRevenue), icon: 'payments', color: '#fbbf24' },
+                  { label: 'Total Views', value: formatNumber(dashboardStats?.totalViews), icon: 'visibility', color: '#7bd0ff' },
+                  { label: 'Total Reviews', value: formatNumber(dashboardStats?.totalReviews), icon: 'rate_review', color: '#4ade80' },
+                  { label: 'Active Movies', value: formatNumber(dashboardStats?.activeMovies), icon: 'movie', color: '#f87171' },
+                  { label: 'Total Revenue', value: formatCurrency(dashboardStats?.totalRevenue), icon: 'payments', color: '#fbbf24' },
                 ].map((card) => (
                   <div key={card.label} className="bg-[#1E293B] border border-[#334155] rounded-xl p-[20px] flex flex-col gap-[12px] hover:border-[#475569] transition-colors">
                     <div className="flex justify-between items-center">
@@ -115,9 +115,9 @@ const AdminAnalytics = () => {
                   {/* Top 3 stats from dashboard */}
                   <section className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
                     {[
-                      { label: 'Lượt xem hôm nay', value: formatNumber(dashboardStats?.viewsToday), icon: 'today', color: '#7bd0ff' },
-                      { label: 'Tổng thể loại', value: formatNumber(dashboardStats?.totalGenres), icon: 'category', color: '#a78bfa' },
-                      { label: 'Tổng mục watchlist', value: formatNumber(dashboardStats?.totalWatchlistItems), icon: 'bookmark', color: '#fb923c' },
+                      { label: 'Views Today', value: formatNumber(dashboardStats?.viewsToday), icon: 'today', color: '#7bd0ff' },
+                      { label: 'Total Genres', value: formatNumber(dashboardStats?.totalGenres), icon: 'category', color: '#a78bfa' },
+                      { label: 'Total Watchlist Items', value: formatNumber(dashboardStats?.totalWatchlistItems), icon: 'bookmark', color: '#fb923c' },
                     ].map((card) => (
                       <div key={card.label} className="bg-[#1E293B] border border-[#334155] rounded-xl p-[20px] flex items-center gap-[16px] hover:border-[#475569] transition-colors">
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: card.color + '20' }}>
@@ -138,7 +138,7 @@ const AdminAnalytics = () => {
                     <div className="bg-[#1E293B] border border-[#334155] rounded-xl overflow-hidden">
                       <div className="px-[20px] py-[16px] border-b border-[#334155] flex items-center gap-[8px]">
                         <span className="material-symbols-outlined text-[#7bd0ff] text-[18px]">leaderboard</span>
-                        <h3 className="text-[14px] font-semibold text-[#f8fafc]">Top Phim Nhiều Lượt Xem Nhất</h3>
+                        <h3 className="text-[14px] font-semibold text-[#f8fafc]">Most Viewed Movies</h3>
                       </div>
                       <div className="divide-y divide-[#334155]">
                         {movieAnalytics?.mostViewedMovies?.length > 0 ? (
@@ -154,12 +154,12 @@ const AdminAnalytics = () => {
                               )}
                               <div className="flex-1 min-w-0">
                                 <div className="text-[13px] font-medium text-[#f8fafc] truncate">{m.title}</div>
-                                <div className="text-[11px] text-[#94A3B8]">{formatNumber(m.count)} lượt xem</div>
+                                <div className="text-[11px] text-[#94A3B8]">{formatNumber(m.count)} views</div>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div className="px-[20px] py-[32px] text-center text-[#94A3B8] text-[13px]">Chưa có dữ liệu</div>
+                          <div className="px-[20px] py-[32px] text-center text-[#94A3B8] text-[13px]">No data available</div>
                         )}
                       </div>
                     </div>
@@ -168,7 +168,7 @@ const AdminAnalytics = () => {
                     <div className="bg-[#1E293B] border border-[#334155] rounded-xl overflow-hidden">
                       <div className="px-[20px] py-[16px] border-b border-[#334155] flex items-center gap-[8px]">
                         <span className="material-symbols-outlined text-yellow-400 text-[18px]">star</span>
-                        <h3 className="text-[14px] font-semibold text-[#f8fafc]">Top Phim Được Đánh Giá Cao Nhất</h3>
+                        <h3 className="text-[14px] font-semibold text-[#f8fafc]">Highest Rated Movies</h3>
                       </div>
                       <div className="divide-y divide-[#334155]">
                         {movieAnalytics?.highestRatedMovies?.length > 0 ? (
@@ -192,7 +192,7 @@ const AdminAnalytics = () => {
                             </div>
                           ))
                         ) : (
-                          <div className="px-[20px] py-[32px] text-center text-[#94A3B8] text-[13px]">Chưa có dữ liệu</div>
+                          <div className="px-[20px] py-[32px] text-center text-[#94A3B8] text-[13px]">No data available</div>
                         )}
                       </div>
                     </div>
@@ -201,7 +201,7 @@ const AdminAnalytics = () => {
                     <div className="bg-[#1E293B] border border-[#334155] rounded-xl overflow-hidden lg:col-span-2">
                       <div className="px-[20px] py-[16px] border-b border-[#334155] flex items-center gap-[8px]">
                         <span className="material-symbols-outlined text-[#a78bfa] text-[18px]">category</span>
-                        <h3 className="text-[14px] font-semibold text-[#f8fafc]">Thể Loại Phổ Biến</h3>
+                        <h3 className="text-[14px] font-semibold text-[#f8fafc]">Popular Genres</h3>
                       </div>
                       <div className="p-[20px]">
                         {movieAnalytics?.popularGenres?.length > 0 ? (
@@ -219,13 +219,13 @@ const AdminAnalytics = () => {
                                   <div className="w-full bg-[#334155] rounded-full h-1.5">
                                     <div className="bg-[#a78bfa] h-1.5 rounded-full transition-all" style={{ width: `${pct}%` }}></div>
                                   </div>
-                                  <div className="text-[10px] text-[#94A3B8]">{g.movieCount} phim</div>
+                                  <div className="text-[10px] text-[#94A3B8]">{g.movieCount} movies</div>
                                 </div>
                               );
                             })}
                           </div>
                         ) : (
-                          <div className="text-center text-[#94A3B8] text-[13px] py-8">Chưa có dữ liệu</div>
+                          <div className="text-center text-[#94A3B8] text-[13px] py-8">No data available</div>
                         )}
                       </div>
                     </div>
@@ -239,10 +239,10 @@ const AdminAnalytics = () => {
                   {/* Revenue KPIs */}
                   <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px]">
                     {[
-                      { label: 'Tổng doanh thu', value: formatCurrency(revenueAnalytics?.totalRevenue), icon: 'payments', color: '#4ade80' },
-                      { label: 'Giao dịch thành công', value: formatNumber(revenueAnalytics?.successfulOrders), icon: 'check_circle', color: '#7bd0ff' },
-                      { label: 'Tổng đơn hàng', value: formatNumber(revenueAnalytics?.totalOrders), icon: 'receipt_long', color: '#fb923c' },
-                      { label: 'Giá trị đơn TB', value: formatCurrency(revenueAnalytics?.averageOrderValue), icon: 'trending_up', color: '#fbbf24' },
+                      { label: 'Total Revenue', value: formatCurrency(revenueAnalytics?.totalRevenue), icon: 'payments', color: '#4ade80' },
+                      { label: 'Successful Orders', value: formatNumber(revenueAnalytics?.successfulOrders), icon: 'check_circle', color: '#7bd0ff' },
+                      { label: 'Total Orders', value: formatNumber(revenueAnalytics?.totalOrders), icon: 'receipt_long', color: '#fb923c' },
+                      { label: 'Average Order Value', value: formatCurrency(revenueAnalytics?.averageOrderValue), icon: 'trending_up', color: '#fbbf24' },
                     ].map((card) => (
                       <div key={card.label} className="bg-[#1E293B] border border-[#334155] rounded-xl p-[20px] flex flex-col gap-[12px] hover:border-[#475569] transition-colors">
                         <div className="flex justify-between items-center">
@@ -258,14 +258,14 @@ const AdminAnalytics = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-[24px]">
                     {[
                       {
-                        label: 'Gói Monthly',
+                        label: 'Monthly Plan',
                         count: revenueAnalytics?.monthlyPlanCount,
                         revenue: revenueAnalytics?.monthlyPlanRevenue,
                         color: '#7bd0ff',
                         icon: 'calendar_month'
                       },
                       {
-                        label: 'Gói Yearly',
+                        label: 'Yearly Plan',
                         count: revenueAnalytics?.yearlyPlanCount,
                         revenue: revenueAnalytics?.yearlyPlanRevenue,
                         color: '#4ade80',
@@ -278,7 +278,7 @@ const AdminAnalytics = () => {
                         </div>
                         <div className="flex-1">
                           <div className="text-[13px] text-[#94A3B8] mb-[4px]">{plan.label}</div>
-                          <div className="text-[22px] font-bold text-[#f8fafc]">{formatNumber(plan.count)} đơn</div>
+                          <div className="text-[22px] font-bold text-[#f8fafc]">{formatNumber(plan.count)} orders</div>
                           <div className="text-[14px]" style={{ color: plan.color }}>{formatCurrency(plan.revenue)}</div>
                         </div>
                       </div>
@@ -289,13 +289,13 @@ const AdminAnalytics = () => {
                   <div className="bg-[#1E293B] border border-[#334155] rounded-xl p-[24px]">
                     <h3 className="text-[14px] font-semibold text-[#f8fafc] mb-[20px] flex items-center gap-[8px]">
                       <span className="material-symbols-outlined text-[#fbbf24] text-[18px]">insights</span>
-                      Thống kê doanh thu từ hệ thống
+                      System Revenue Statistics
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-[16px]">
                       {[
-                        { label: 'Doanh thu hôm nay', value: formatCurrency(dashboardStats?.revenueToday) },
-                        { label: 'Doanh thu tháng này', value: formatCurrency(dashboardStats?.revenueThisMonth) },
-                        { label: 'Doanh thu năm này', value: formatCurrency(dashboardStats?.revenueThisYear) },
+                        { label: 'Revenue Today', value: formatCurrency(dashboardStats?.revenueToday) },
+                        { label: 'Revenue This Month', value: formatCurrency(dashboardStats?.revenueThisMonth) },
+                        { label: 'Revenue This Year', value: formatCurrency(dashboardStats?.revenueThisYear) },
                         { label: 'User premium', value: formatNumber(dashboardStats?.premiumUsers) },
                       ].map((item) => (
                         <div key={item.label} className="bg-[#0F172A] rounded-lg p-[16px]">

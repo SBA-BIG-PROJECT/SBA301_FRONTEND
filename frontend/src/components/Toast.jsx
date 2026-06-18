@@ -33,7 +33,7 @@ const ToastItem = ({ id, type, message, onClose }) => {
           <path d="M7 12l3.5 3.5L17 8.5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
-      label: 'Thành công',
+      label: 'Success',
     },
     error: {
       bg: 'linear-gradient(135deg, #4a0d0d 0%, #7b1a1a 100%)',
@@ -44,7 +44,7 @@ const ToastItem = ({ id, type, message, onClose }) => {
           <path d="M15 9l-6 6M9 9l6 6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
       ),
-      label: 'Lỗi',
+      label: 'Error',
     },
     warning: {
       bg: 'linear-gradient(135deg, #4a3200 0%, #7a5200 100%)',
@@ -55,7 +55,7 @@ const ToastItem = ({ id, type, message, onClose }) => {
           <path d="M12 9v5M12 16.5v.5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
       ),
-      label: 'Cảnh báo',
+      label: 'Warning',
     },
     info: {
       bg: 'linear-gradient(135deg, #0d2a4a 0%, #1a4a7a 100%)',
@@ -66,7 +66,7 @@ const ToastItem = ({ id, type, message, onClose }) => {
           <path d="M12 8v1M12 11v5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
       ),
-      label: 'Thông tin',
+      label: 'Info',
     },
   };
 
@@ -194,8 +194,8 @@ export const ToastContainer = ({ toasts, onClose }) => {
  * useToast hook — call in any component
  *
  * const { toasts, showToast, closeToast } = useToast();
- * showToast('success', 'Lưu thành công!');
- * showToast('error', 'Có lỗi xảy ra.');
+ * showToast('success', 'Saved successfully!');
+ * showToast('error', 'An error occurred.');
  */
 export const useToast = () => {
   const [toasts, setToasts] = useState([]);

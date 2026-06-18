@@ -16,14 +16,14 @@ const Register = () => {
     setIsLoading(true)
 
     try {
-      // Gửi đúng các trường mà backend RegisterRequest yêu cầu
+      // Send correct fields for backend RegisterRequest
       await authService.register({
         fullName,
         email,
         password
       })
       
-      // Đăng ký thành công thì chuyển về trang login
+      // Register success, navigate to login
       navigate('/login')
     } catch (err) {
       console.error('Registration error:', err)

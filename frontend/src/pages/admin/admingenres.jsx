@@ -51,7 +51,7 @@ const AdminGenres = () => {
       setShowGenreModal(false);
     } catch (err) {
       console.error('Error creating genre:', err);
-      showToast('error', 'Tạo thể loại thất bại.');
+      showToast('error', 'Failed to create genre.');
     }
   };
 
@@ -65,7 +65,7 @@ const AdminGenres = () => {
       setShowCategoryModal(false);
     } catch (err) {
       console.error('Error creating category:', err);
-      showToast('error', 'Tạo danh mục thất bại.');
+      showToast('error', 'Failed to create category.');
     }
   };
 
@@ -76,7 +76,7 @@ const AdminGenres = () => {
         setGenres(genres.filter(g => g.id !== id));
       } catch (err) {
         console.error('Error deleting genre:', err);
-        showToast('error', 'Xóa thể loại thất bại.');
+        showToast('error', 'Failed to delete genre.');
       }
     }
   };
@@ -88,7 +88,7 @@ const AdminGenres = () => {
         setCategories(categories.filter(c => c.id !== id));
       } catch (err) {
         console.error('Error deleting category:', err);
-        showToast('error', 'Xóa danh mục thất bại.');
+        showToast('error', 'Failed to delete category.');
       }
     }
   };

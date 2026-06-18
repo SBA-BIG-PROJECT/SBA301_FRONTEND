@@ -28,7 +28,7 @@ const SearchPage = () => {
       setErrorMessage('')
 
       try {
-        // Gọi Backend API search
+        // Call Backend API search
         const response = await movieService.searchMovies(query, 0, 20)
         
         if (!active) return
@@ -106,7 +106,7 @@ const SearchPage = () => {
                 </Link>
                 <div className="movie-card__actions">
                   <Link className="btn btn--ghost" to={`/movie/${movie.id}`}>
-                    Chi tiết
+                    Details
                   </Link>
                   <Link className="btn btn--primary" to={`/watch/${movie.id}`}>
                     Trailer

@@ -19,7 +19,7 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      // Backend LoginRequest chỉ yêu cầu email và password
+      // Backend LoginRequest only requires email and password
       const response = await authService.login({ email, password })
       
       const user = response.user;
@@ -27,7 +27,7 @@ const Login = () => {
                       user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN') ||
                       user?.authorities?.some(a => a.authority === 'ROLE_ADMIN');
 
-      // Đăng nhập thành công, chuyển hướng về trang chủ hoặc dashboard
+      // Login success, redirect to home or dashboard
       if (isAdmin) {
         navigate('/admin/dashboard')
       } else {

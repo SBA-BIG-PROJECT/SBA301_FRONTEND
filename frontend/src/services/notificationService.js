@@ -2,11 +2,11 @@ import apiClient from './api'
 
 /**
  * Notification Service
- * Xử lý các API liên quan đến notifications
+ * Handle API calls related to notifications
  */
 const notificationService = {
   /**
-   * Lấy danh sách notifications
+   * Get notifications
    * GET /notifications
    * @param {Object} params - { page, size }
    * @returns {Promise} PageResponse<NotificationDto>
@@ -19,7 +19,7 @@ const notificationService = {
   },
 
   /**
-   * Lấy số lượng notification chưa đọc
+   * Get unread notification count
    * GET /notifications/unread-count
    * @returns {Promise} number
    */
@@ -29,7 +29,7 @@ const notificationService = {
   },
 
   /**
-   * Đánh dấu notification là đã đọc
+   * Mark notification as read
    * PATCH /notifications/{notificationId}/read
    * @param {number} notificationId
    * @returns {Promise}
@@ -40,7 +40,7 @@ const notificationService = {
   },
 
   /**
-   * Đánh dấu tất cả notifications là đã đọc
+   * Mark all notifications as read
    * PUT /notifications/read-all
    * @returns {Promise}
    */
@@ -50,7 +50,7 @@ const notificationService = {
   },
 
   /**
-   * Xóa notification
+   * Delete notification
    * DELETE /notifications/{notificationId}
    * @param {number} notificationId
    * @returns {Promise}

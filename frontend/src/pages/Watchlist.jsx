@@ -16,7 +16,7 @@ const Watchlist = () => {
         <Spinner />
       ) : error ? (
         <div className="empty">
-          <p className="search-results__empty text-red-400">Không thể tải danh sách. Vui lòng thử lại.</p>
+          <p className="search-results__empty text-red-400">Cannot load list. Please try again.</p>
         </div>
       ) : watchlist.length === 0 ? (
         <div className="empty">

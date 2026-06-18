@@ -25,7 +25,7 @@ const History = () => {
         <Spinner />
       ) : error ? (
         <div className="empty">
-          <p className="search-results__empty text-red-400">Không thể tải lịch sử. Vui lòng thử lại.</p>
+          <p className="search-results__empty text-red-400">Cannot load history. Please try again.</p>
         </div>
       ) : history.length === 0 ? (
         <div className="empty">

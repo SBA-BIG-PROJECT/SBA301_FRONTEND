@@ -12,7 +12,7 @@ const Watch = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   
-  // States cho comment/review
+  // States for comment/review
   const [reviews, setReviews] = useState([])
   const [newComment, setNewComment] = useState('')
   const [newRating, setNewRating] = useState(10.0)
@@ -25,12 +25,12 @@ const Watch = () => {
   const { addToHistory } = useHistory()
   const { isAuthenticated, user } = useAuth()
 
-  // Hàm trích xuất Youtube Video ID từ URL
+  // Function to extract YouTube Video ID from URL
   const extractVideoID = (url) => {
     if (!url) return '';
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : url; // Trả về ID hoặc nguyên gốc nếu không parse được
+    return (match && match[2].length === 11) ? match[2] : url; // Return ID or original if unparseable
   };
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const Watch = () => {
       setErrorMessage('')
 
       try {
-        // Tải chi tiết phim, danh sách review, và phim liên quan song song
+        // Load movie details, reviews, and related movies in parallel
         const [movieData, reviewsData, relatedData] = await Promise.all([
           movieService.getMovieDetail(id),
           reviewService.getReviews(id, { page: 0, size: 50 }).catch(() => ({ content: [] })),
@@ -56,7 +56,7 @@ const Watch = () => {
         setReviews(reviewsData.content || [])
         setRelatedMovies(relatedData.content || relatedData || [])
         
-        // Lấy trailerKey từ trailerUrl do backend trả về
+        // Get trailerKey from backend trailerUrl
         if (movieData?.trailerUrl) {
           setTrailerKey(extractVideoID(movieData.trailerUrl))
         }
@@ -94,7 +94,7 @@ const Watch = () => {
         rating: newRating,
         comment: newComment
       })
-      // Thêm review mới lên đầu danh sách
+      // Add new review to top of list
       setReviews(prev => [review, ...prev])
       setNewComment('')
       setNewRating(10.0)
@@ -106,7 +106,7 @@ const Watch = () => {
     }
   }
 
-  // Nếu trailerKey đã là 1 embed link thì giữ nguyên, nếu không thì bọc lại
+  // Keep embed link or wrap it
   const embedUrl = trailerKey
     ? (trailerKey.includes('http') ? trailerKey : `https://www.youtube.com/embed/${trailerKey}`)
     : ''
@@ -149,7 +149,7 @@ const Watch = () => {
                 <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z" />
                 </svg>
-                <h3 className="text-xl font-bold">Bình luận & Đánh giá ({reviews.length})</h3>
+                <h3 className="text-xl font-bold">Comments & Reviews ({reviews.length})</h3>
               </div>
               <button className="text-gray-400 hover:text-white transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +161,7 @@ const Watch = () => {
             {!isAuthenticated ? (
               <div className="mb-8">
                 <Link to="/login" className="inline-flex items-center gap-2 bg-[#242730] hover:bg-[#2a2d36] text-gray-300 px-6 py-3 rounded-lg text-sm font-medium transition-colors">
-                  <span>➜</span> Đăng nhập để bình luận
+                  <span>➜</span> Login to comment
                 </Link>
               </div>
             ) : (
@@ -170,7 +170,7 @@ const Watch = () => {
                   {user?.username?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                   <div className="mb-4 flex flex-col gap-2 bg-[#242730] p-4 rounded-lg">
-                    <p className="text-sm font-medium text-gray-300">Điểm đánh giá của bạn:</p>
+                    <p className="text-sm font-medium text-gray-300">Your rating:</p>
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1">
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
@@ -206,7 +206,7 @@ const Watch = () => {
                   <div className="relative">
                     <textarea 
                       className="w-full bg-transparent p-4 text-gray-200 placeholder-gray-500 focus:outline-none resize-none min-h-[100px] text-sm"
-                      placeholder="Viết bình luận & đánh giá của bạn..."
+                      placeholder="Write your comment & review..."
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       maxLength={1000}
@@ -216,7 +216,7 @@ const Watch = () => {
                     <div className="flex items-center gap-4">
                       <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-400 hover:text-gray-300 transition-colors">
                         <input type="checkbox" className="rounded bg-gray-800 border-gray-700 text-red-500 focus:ring-red-500" />
-                        Tiết lộ nội dung?
+                        Contains spoilers?
                       </label>
                     </div>
                     <button 
@@ -224,7 +224,7 @@ const Watch = () => {
                       disabled={submitting || !newComment.trim()}
                       className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md font-medium text-sm disabled:opacity-50 transition-colors"
                     >
-                      {submitting ? 'Đang gửi...' : 'Gửi'}
+                      {submitting ? 'Submitting...' : 'Submit'}
                     </button>
                   </div>
                 </form>
@@ -235,7 +235,7 @@ const Watch = () => {
             <div className="flex flex-col border-t border-gray-800 pt-6">
               {reviews.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center">
-                  <p className="text-gray-500 text-sm">Chưa có bình luận nào</p>
+                  <p className="text-gray-500 text-sm">No comments yet</p>
                 </div>
               ) : (
                 reviews.map((review, index) => (
@@ -251,8 +251,8 @@ const Watch = () => {
                     
                     <div className="flex-1">
                       <div className="flex items-baseline gap-2 mb-1">
-                        <h4 className="font-bold text-gray-200 text-[15px]">{review.userName || 'Người dùng ẩn danh'}</h4>
-                        <span className="text-xs text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">Lv.1 - Nhập môn</span>
+                        <h4 className="font-bold text-gray-200 text-[15px]">{review.userName || 'Anonymous user'}</h4>
+                        <span className="text-xs text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">Lv.1 - Beginner</span>
                       </div>
                       
                       {review.rating && (
@@ -260,7 +260,7 @@ const Watch = () => {
                           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                           </svg>
-                          <span>{Number(review.rating).toFixed(1)} Điểm</span>
+                          <span>{Number(review.rating).toFixed(1)} Points</span>
                         </div>
                       )}
                       
@@ -282,9 +282,9 @@ const Watch = () => {
                             const diffTime = Math.abs(now - date);
                             const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
                             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                            if (diffHours < 24) return `${diffHours || 1} giờ trước`;
-                            return `${diffDays} ngày trước`;
-                          })() : 'Vừa xong'}
+                            if (diffHours < 24) return `${diffHours || 1} hours ago`;
+                            return `${diffDays} days ago`;
+                          })() : 'Just now'}
                         </span>
                       </div>
                     </div>
@@ -294,7 +294,7 @@ const Watch = () => {
               
               {reviews.length > 0 && (
                 <button className="w-full mt-6 bg-[#1a1c22] hover:bg-[#242730] text-gray-300 py-3 rounded-lg font-medium transition-colors text-sm border border-gray-800">
-                  Tải thêm bình luận
+                  Load more comments
                 </button>
               )}
             </div>
@@ -310,7 +310,7 @@ const Watch = () => {
               <svg className="w-5 h-5 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
               </svg>
-              <h3 className="text-xl font-bold">Phim tương tự</h3>
+              <h3 className="text-xl font-bold">Related movies</h3>
             </div>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
