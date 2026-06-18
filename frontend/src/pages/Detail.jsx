@@ -37,7 +37,7 @@ const Detail = () => {
       setErrorMessage('')
 
       try {
-        // Gọi Backend API
+        // Call Backend API
         const movieData = await movieService.getMovieDetail(id)
 
         if (!active) return
@@ -225,7 +225,7 @@ const Detail = () => {
         </div>
       )}
 
-      {/* Cast section - Backend chưa có endpoint này */}
+      {/* Cast section - Backend doesn't have this endpoint yet */}
       <div className="detail__cast">
         <div className="row__header">
           <h2>Top Cast</h2>
@@ -237,7 +237,7 @@ const Detail = () => {
         </div>
       </div>
 
-      {/* Related movies - Backend chưa có endpoint này */}
+      {/* Related movies - Backend doesn't have this endpoint yet */}
       <div className="detail__related mt-10">
         <div className="row__header">
           <h2>Related Movies</h2>
@@ -249,7 +249,7 @@ const Detail = () => {
         </div>
       </div>
 
-      {/* Reviews - Backend có endpoint rồi, tạm thời hiển thị message */}
+      {/* Reviews - Backend has endpoint, temporarily show message */}
       <div className="detail__reviews mt-10">
         <div className="row__header">
           <h2>Reviews</h2>

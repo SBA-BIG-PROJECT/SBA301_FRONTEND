@@ -7,7 +7,7 @@ const AVATAR_PLACEHOLDER = null
 
 const fmtDate = (iso) => {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('vi-VN', {
+  return new Date(iso).toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric'
   })
 }
@@ -101,7 +101,7 @@ const UserProfile = ({ onClose }) => {
         setFullName(profileData.fullName || '')
         setAge(profileData.age?.toString() || '')
       } catch (err) {
-        if (active) setError('Không tải được thông tin. Vui lòng thử lại.')
+        if (active) setError('Could not load information. Please try again.')
       } finally {
         if (active) setLoading(false)
       }
@@ -122,7 +122,7 @@ const UserProfile = ({ onClose }) => {
       const updated = await userService.uploadAvatar(file)
       setProfile(updated)
     } catch (err) {
-      alert('Upload avatar thất bại. Vui lòng thử lại.')
+      alert('Avatar upload failed. Please try again.')
     } finally {
       setAvatarUploading(false)
       e.target.value = ''
@@ -135,7 +135,7 @@ const UserProfile = ({ onClose }) => {
       const updated = await userService.deleteAvatar()
       setProfile(updated)
     } catch {
-      alert('Xoá avatar thất bại.')
+      alert('Avatar deletion failed.')
     } finally {
       setAvatarUploading(false)
     }
@@ -145,9 +145,9 @@ const UserProfile = ({ onClose }) => {
   const handleSaveProfile = async (e) => {
     e.preventDefault()
     const errors = {}
-    if (fullName.trim().length < 2) errors.fullName = 'Tên tối thiểu 2 ký tự'
-    if (fullName.trim().length > 100) errors.fullName = 'Tên tối đa 100 ký tự'
-    if (age && (Number(age) < 13 || Number(age) > 150)) errors.age = 'Tuổi phải từ 13 đến 150'
+    if (fullName.trim().length < 2) errors.fullName = 'Name minimum 2 characters'
+    if (fullName.trim().length > 100) errors.fullName = 'Name maximum 100 characters'
+    if (age && (Number(age) < 13 || Number(age) > 150)) errors.age = 'Age must be between 13 and 150'
     if (Object.keys(errors).length) { setProfileError(errors); return }
 
     setProfileSaving(true)
@@ -160,10 +160,10 @@ const UserProfile = ({ onClose }) => {
       })
       setProfile(updated)
       setEditMode(false)
-      setProfileMsg('Cập nhật thành công!')
+      setProfileMsg('Updated successfully!')
       setTimeout(() => setProfileMsg(''), 3000)
     } catch (err) {
-      const msg = err.response?.data?.message || 'Cập nhật thất bại.'
+      const msg = err.response?.data?.message || 'Update failed.'
       setProfileError({ api: msg })
     } finally {
       setProfileSaving(false)
@@ -174,11 +174,11 @@ const UserProfile = ({ onClose }) => {
   const handleChangePassword = async (e) => {
     e.preventDefault()
     const errors = {}
-    if (!currentPassword) errors.current = 'Nhập mật khẩu hiện tại'
-    if (newPassword.length < 8) errors.new = 'Mật khẩu tối thiểu 8 ký tự'
+    if (!currentPassword) errors.current = 'Enter current password'
+    if (newPassword.length < 8) errors.new = 'Password minimum 8 characters'
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword))
-      errors.new = 'Phải có chữ hoa, chữ thường và số'
-    if (newPassword !== confirmPassword) errors.confirm = 'Mật khẩu không khớp'
+      errors.new = 'Must contain uppercase, lowercase and numbers'
+    if (newPassword !== confirmPassword) errors.confirm = 'Passwords do not match'
     if (Object.keys(errors).length) { setPwError(errors); return }
 
     setPwSaving(true)
@@ -189,10 +189,10 @@ const UserProfile = ({ onClose }) => {
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      setPwMsg('Đổi mật khẩu thành công!')
+      setPwMsg('Password changed successfully!')
       setTimeout(() => setPwMsg(''), 3000)
     } catch (err) {
-      const msg = err.response?.data?.message || 'Đổi mật khẩu thất bại.'
+      const msg = err.response?.data?.message || 'Password change failed.'
       setPwError({ api: msg })
     } finally {
       setPwSaving(false)
@@ -201,7 +201,7 @@ const UserProfile = ({ onClose }) => {
 
   // ── Delete Account ─────────────────────────────────────────────────────────
   const handleDeleteAccount = async () => {
-    if (!deletePassword) { setDeleteError('Nhập mật khẩu để xác nhận'); return }
+    if (!deletePassword) { setDeleteError('Enter password to confirm'); return }
     setDeleteLoading(true)
     setDeleteError('')
     try {
@@ -209,7 +209,7 @@ const UserProfile = ({ onClose }) => {
       authService.logout()
       navigate('/')
     } catch (err) {
-      setDeleteError(err.response?.data?.message || 'Xoá tài khoản thất bại.')
+      setDeleteError(err.response?.data?.message || 'Account deletion failed.')
     } finally {
       setDeleteLoading(false)
     }
@@ -233,7 +233,7 @@ const UserProfile = ({ onClose }) => {
     return (
       <div className="up-loading">
         <div className="up-spinner" />
-        <p>Đang tải hồ sơ...</p>
+        <p>Loading profile...</p>
       </div>
     )
   }
@@ -243,7 +243,7 @@ const UserProfile = ({ onClose }) => {
       <div className="up-error">
         <p>{error}</p>
         <button className="up-btn up-btn--primary" onClick={() => window.location.reload()}>
-          Thử lại
+          Try again
         </button>
       </div>
     )
@@ -253,13 +253,13 @@ const UserProfile = ({ onClose }) => {
 
   return (
     <div className="up-overlay" onClick={(e) => e.target === e.currentTarget && onClose?.()}>
-      <div className="up-modal" role="dialog" aria-label="Hồ sơ cá nhân">
+      <div className="up-modal" role="dialog" aria-label="User Profile">
 
         {/* ── Header ─────────────────────────────────────── */}
         <div className="up-header">
-          <h2 className="up-title">Hồ sơ cá nhân</h2>
+          <h2 className="up-title">User Profile</h2>
           {onClose && (
-            <button className="up-close" onClick={onClose} aria-label="Đóng">
+            <button className="up-close" onClick={onClose} aria-label="Close">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
@@ -270,7 +270,7 @@ const UserProfile = ({ onClose }) => {
         {/* ── Avatar + identity ──────────────────────────── */}
         <div className="up-identity">
           <div className="up-avatar-wrap">
-            <div className="up-avatar" onClick={handleAvatarClick} title="Đổi ảnh đại diện">
+            <div className="up-avatar" onClick={handleAvatarClick} title="Change avatar">
               {profile?.avatarUrl ? (
                 <img src={profile.avatarUrl} alt={profile.fullName} className="up-avatar__img" />
               ) : (
@@ -292,7 +292,7 @@ const UserProfile = ({ onClose }) => {
               onChange={handleAvatarChange}
             />
             {profile?.avatarUrl && (
-              <button className="up-avatar__remove" onClick={handleDeleteAvatar} title="Xoá ảnh">
+              <button className="up-avatar__remove" onClick={handleDeleteAvatar} title="Remove avatar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/>
                 </svg>
@@ -301,7 +301,7 @@ const UserProfile = ({ onClose }) => {
           </div>
 
           <div className="up-identity__info">
-            <h3 className="up-identity__name">{profile?.fullName || 'Người dùng'}</h3>
+            <h3 className="up-identity__name">{profile?.fullName || 'User'}</h3>
             <p className="up-identity__email">{profile?.email}</p>
             <div className="up-identity__badges">
               {profile?.isPremium ? (
@@ -309,7 +309,7 @@ const UserProfile = ({ onClose }) => {
                   ⭐ Premium
                 </span>
               ) : (
-                <span className="up-badge up-badge--free">Miễn phí</span>
+                <span className="up-badge up-badge--free">Free</span>
               )}
               <span className="up-badge up-badge--role">{profile?.role || 'USER'}</span>
             </div>
@@ -319,10 +319,10 @@ const UserProfile = ({ onClose }) => {
         {/* ── Stats ──────────────────────────────────────── */}
         {stats && (
           <div className="up-stats">
-            <StatCard icon="🎬" label="Đã xem" value={stats.totalViewedMovies} />
-            <StatCard icon="📝" label="Đánh giá" value={stats.totalReviews} />
+            <StatCard icon="🎬" label="Watched" value={stats.totalViewedMovies} />
+            <StatCard icon="📝" label="Reviews" value={stats.totalReviews} />
             <StatCard icon="🔖" label="Watchlist" value={stats.totalWatchlistItems} />
-            <StatCard icon="⭐" label="TB đánh giá" value={stats.averageRating ? Number(stats.averageRating).toFixed(1) : '—'} />
+            <StatCard icon="⭐" label="Avg Rating" value={stats.averageRating ? Number(stats.averageRating).toFixed(1) : '—'} />
           </div>
         )}
 
@@ -332,13 +332,13 @@ const UserProfile = ({ onClose }) => {
             className={`up-tab ${activeTab === 'profile' ? 'up-tab--active' : ''}`}
             onClick={() => setActiveTab('profile')}
           >
-            Thông tin
+            Information
           </button>
           <button
             className={`up-tab ${activeTab === 'security' ? 'up-tab--active' : ''}`}
             onClick={() => setActiveTab('security')}
           >
-            Bảo mật
+            Security
           </button>
         </div>
 
@@ -351,35 +351,35 @@ const UserProfile = ({ onClose }) => {
             {editMode ? (
               <form onSubmit={handleSaveProfile} className="up-form">
                 <InputField
-                  label="Họ và tên"
+                  label="Full Name"
                   id="fullName"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Nhập tên đầy đủ"
+                  placeholder="Enter full name"
                   error={profileError.fullName}
                 />
                 <InputField
-                  label="Tuổi"
+                  label="Age"
                   id="age"
                   type="number"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  placeholder="Nhập tuổi (13-150)"
+                  placeholder="Enter age (13-150)"
                   error={profileError.age}
                 />
                 <div className="up-form__actions">
                   <button type="submit" className="up-btn up-btn--primary" disabled={profileSaving}>
-                    {profileSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                    {profileSaving ? 'Saving...' : 'Save changes'}
                   </button>
                   <button type="button" className="up-btn up-btn--ghost" onClick={() => { setEditMode(false); setProfileError({}) }}>
-                    Huỷ
+                    Cancel
                   </button>
                 </div>
               </form>
             ) : (
               <div className="up-info-list">
                 <div className="up-info-row">
-                  <span className="up-info-label">Họ và tên</span>
+                  <span className="up-info-label">Full Name</span>
                   <span className="up-info-value">{profile?.fullName || '—'}</span>
                 </div>
                 <div className="up-info-row">
@@ -387,21 +387,21 @@ const UserProfile = ({ onClose }) => {
                   <span className="up-info-value">{profile?.email}</span>
                 </div>
                 <div className="up-info-row">
-                  <span className="up-info-label">Tuổi</span>
+                  <span className="up-info-label">Age</span>
                   <span className="up-info-value">{profile?.age || '—'}</span>
                 </div>
                 <div className="up-info-row">
-                  <span className="up-info-label">Tham gia</span>
+                  <span className="up-info-label">Joined</span>
                   <span className="up-info-value">{fmtDate(profile?.createdAt)}</span>
                 </div>
                 {profile?.isPremium && (
                   <div className="up-info-row">
-                    <span className="up-info-label">Premium hết hạn</span>
+                    <span className="up-info-label">Premium expires</span>
                     <span className="up-info-value">{fmtDate(profile?.premiumExpiresAt)}</span>
                   </div>
                 )}
                 <button className="up-btn up-btn--primary up-btn--full mt-4" onClick={() => setEditMode(true)}>
-                  ✏️ Chỉnh sửa thông tin
+                  ✏️ Edit information
                 </button>
               </div>
             )}
@@ -412,13 +412,13 @@ const UserProfile = ({ onClose }) => {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                 </svg>
-                Danh sách yêu thích
+                Watchlist
               </a>
               <a className="up-quick-link" href="/history">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
-                Lịch sử xem
+                Watch History
               </a>
             </div>
 
@@ -427,7 +427,7 @@ const UserProfile = ({ onClose }) => {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                Đăng xuất
+                Logout
               </button>
             </div>
           </div>
@@ -436,50 +436,50 @@ const UserProfile = ({ onClose }) => {
         {/* ── Tab: Security ──────────────────────────────── */}
         {activeTab === 'security' && (
           <div className="up-tab-content">
-            <h3 className="up-section-title">Đổi mật khẩu</h3>
+            <h3 className="up-section-title">Change Password</h3>
             {pwMsg && <div className="up-alert up-alert--success">{pwMsg}</div>}
             {pwError.api && <div className="up-alert up-alert--error">{pwError.api}</div>}
 
             <form onSubmit={handleChangePassword} className="up-form">
               <InputField
-                label="Mật khẩu hiện tại"
+                label="Current Password"
                 id="currentPassword"
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Nhập mật khẩu hiện tại"
+                placeholder="Enter current password"
                 error={pwError.current}
               />
               <InputField
-                label="Mật khẩu mới"
+                label="New Password"
                 id="newPassword"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Tối thiểu 8 ký tự, có hoa/thường/số"
+                placeholder="Min 8 chars, mixed case/numbers"
                 error={pwError.new}
-                hint="Mật khẩu phải có ít nhất 1 chữ hoa, 1 chữ thường và 1 số."
+                hint="Password must contain at least 1 uppercase, 1 lowercase and 1 number."
               />
               <InputField
-                label="Xác nhận mật khẩu mới"
+                label="Confirm New Password"
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Nhập lại mật khẩu mới"
+                placeholder="Re-enter new password"
                 error={pwError.confirm}
               />
               <div className="up-form__actions">
                 <button type="submit" className="up-btn up-btn--primary" disabled={pwSaving}>
-                  {pwSaving ? 'Đang đổi...' : 'Đổi mật khẩu'}
+                  {pwSaving ? 'Changing...' : 'Change Password'}
                 </button>
               </div>
             </form>
 
             {/* Delete account */}
             <div className="up-danger-section">
-              <h3 className="up-section-title up-section-title--danger">Vùng nguy hiểm</h3>
-              <p className="up-danger-desc">Xoá tài khoản sẽ không thể khôi phục. Tất cả dữ liệu của bạn sẽ bị xoá vĩnh viễn.</p>
+              <h3 className="up-section-title up-section-title--danger">Danger Zone</h3>
+              <p className="up-danger-desc">Deleting your account is irreversible. All your data will be permanently deleted.</p>
               <button
                 className="up-btn up-btn--danger"
                 onClick={() => setShowDeleteModal(true)}
@@ -487,7 +487,7 @@ const UserProfile = ({ onClose }) => {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/>
                 </svg>
-                Xoá tài khoản
+                Delete account
               </button>
             </div>
           </div>
@@ -497,22 +497,22 @@ const UserProfile = ({ onClose }) => {
         {showDeleteModal && (
           <div className="up-confirm-overlay" onClick={(e) => e.target === e.currentTarget && setShowDeleteModal(false)}>
             <div className="up-confirm-modal">
-              <h3>⚠️ Xác nhận xoá tài khoản</h3>
-              <p>Hành động này không thể hoàn tác. Nhập mật khẩu để xác nhận:</p>
+              <h3>⚠️ Confirm account deletion</h3>
+              <p>This action cannot be undone. Enter password to confirm:</p>
               <input
                 type="password"
                 className="up-field__input"
-                placeholder="Mật khẩu của bạn"
+                placeholder="Your password"
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
               />
               {deleteError && <p className="up-field__error">{deleteError}</p>}
               <div className="up-form__actions">
                 <button className="up-btn up-btn--danger" onClick={handleDeleteAccount} disabled={deleteLoading}>
-                  {deleteLoading ? 'Đang xoá...' : 'Xác nhận xoá'}
+                  {deleteLoading ? 'Deleting...' : 'Confirm deletion'}
                 </button>
                 <button className="up-btn up-btn--ghost" onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError('') }}>
-                  Huỷ
+                  Cancel
                 </button>
               </div>
             </div>

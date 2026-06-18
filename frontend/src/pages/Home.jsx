@@ -97,7 +97,7 @@ const Home = () => {
         if (list.length > 0) setHeroMovie(list[0])
       } catch (err) {
         console.error(err)
-        if (active) setErrorMessage('Không thể tải phim. Hãy đảm bảo backend đang chạy.')
+        if (active) setErrorMessage('Cannot load movies. Please ensure backend is running.')
       } finally {
         if (active) setIsLoading(false)
       }
@@ -116,7 +116,7 @@ const Home = () => {
       const newMovies = response.content || []
       if (newMovies.length === 0) {
         setHasMore(false)
-        setLoadMoreError('Đã hiển thị tất cả phim.')
+        setLoadMoreError('All movies displayed.')
       } else {
         setMovies(prev => [...prev, ...newMovies])
         setHasMore(!response.last)
@@ -124,7 +124,7 @@ const Home = () => {
       }
     } catch (err) {
       console.error('[LoadMore]', err)
-      setLoadMoreError('Không tải được. Vui lòng thử lại.')
+      setLoadMoreError('Failed to load. Please try again.')
     } finally {
       setLoadMoreLoading(false)
     }
@@ -132,8 +132,8 @@ const Home = () => {
 
   const heroBackdrop = getBackdrop(heroMovie?.posterPath)
   const heroPoster = getPoster(heroMovie?.posterPath)
-  const heroTitle = heroMovie?.title || 'Chào mừng đến SBA Movies'
-  const heroOverview = heroMovie?.overview || 'Khám phá bộ sưu tập phim phong phú của chúng tôi.'
+  const heroTitle = heroMovie?.title || 'Welcome to SBA Movies'
+  const heroOverview = heroMovie?.overview || 'Explore our extensive movie collection.'
   const heroRating = getRating(heroMovie?.rating)
   const heroYear = getYear(heroMovie?.releaseYear)
 
@@ -153,7 +153,7 @@ const Home = () => {
             <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
-            Đề xuất hôm nay
+            Today's Recommendations
           </span>
 
           <h1 className="hm-hero__title">{heroTitle}</h1>
@@ -195,7 +195,7 @@ const Home = () => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                 <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
               </svg>
-              Chi tiết
+              Details
             </button>
           </div>
 
@@ -219,7 +219,7 @@ const Home = () => {
         <div className="hm-section__header">
           <div className="hm-section__title-wrap">
             <div className="hm-section__accent" />
-            <h2 className="hm-section__title">Tất cả phim</h2>
+            <h2 className="hm-section__title">All Movies</h2>
           </div>
           {movies.length > 0 && (
             <span className="hm-section__count">{movies.length} phim</span>
@@ -233,7 +233,7 @@ const Home = () => {
         ) : movies.length === 0 && !errorMessage ? (
           <div className="hm-empty">
             <div className="hm-empty__icon">🎬</div>
-            <p className="hm-empty__text">Không có phim nào. Kiểm tra kết nối backend.</p>
+            <p className="hm-empty__text">No movies available. Check backend connection.</p>
           </div>
         ) : (
           <div className="hm-grid">
@@ -264,7 +264,7 @@ const Home = () => {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                     <polyline points="6 9 12 15 18 9" />
                   </svg>
-                  Tải thêm phim
+                  Load more movies
                 </>
               )}
             </button>

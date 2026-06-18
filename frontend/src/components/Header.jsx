@@ -59,9 +59,9 @@ const Header = () => {
         }
 
         const sorted = (data || [])
-          // Bỏ thể loại Chương Trình Truyền Hình
+          // Remove TV Shows genre
           .filter((g) => !g.name?.toLowerCase().includes('chương trình') && !g.name?.toLowerCase().includes('truyền hình'))
-          // Bỏ chữ "Phim " ở đầu tên thể loại
+          // Remove the word "Phim" from the beginning of genre name
           .map((g) => ({ ...g, name: g.name?.replace(/^phim\s+/i, '').trim() }))
           .slice()
           .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
@@ -264,9 +264,9 @@ const Header = () => {
                           <div className="genres-panel__head-left">
                             <span className="genres-panel__icon">🎬</span>
                             <div>
-                              <p className="genres-panel__heading">Thể loại phim</p>
+                              <p className="genres-panel__heading">Movie Genres</p>
                               <p className="genres-panel__sub">
-                                {genres.length > 0 ? `${genres.length} thể loại` : ''}
+                                {genres.length > 0 ? `${genres.length} genres` : ''}
                               </p>
                             </div>
                           </div>
@@ -285,7 +285,7 @@ const Header = () => {
                         {genres.length === 0 ? (
                           <div className="genres-panel__empty">
                             <div className="genres-panel__spinner" />
-                            <p>{genresError || 'Đang tải thể loại...'}</p>
+                            <p>{genresError || 'Loading genres...'}</p>
                           </div>
                         ) : (
                           <div className="genres-panel__grid">
@@ -440,32 +440,32 @@ const Header = () => {
                 <div className="absolute right-0 top-full mt-2 w-72 bg-[#1a1c22] rounded-xl border border-gray-800 shadow-2xl overflow-hidden z-50 flex flex-col font-['Inter']">
                   <div className="p-5 border-b border-gray-800">
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="font-bold text-gray-200 text-lg">{profile?.fullName || 'Người dùng'}</span>
+                      <span className="font-bold text-gray-200 text-lg">{profile?.fullName || 'User'}</span>
                       <svg className="w-6 h-6 text-yellow-500 drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/>
                       </svg>
                     </div>
                     <p className="text-sm text-gray-400 mb-4">
-                      Nâng cấp tài khoản <strong className="text-white">RoX</strong> để có trải nghiệm đẳng cấp hơn.
+                      Upgrade your account to <strong className="text-white">RoX</strong> for a premium experience.
                     </p>
                     <Link 
                       to="/payment" 
                       onClick={() => setProfileMenuOpen(false)}
                       className="block w-full bg-[#fbd065] hover:bg-[#facc15] text-black text-center py-2.5 rounded-md font-bold text-sm transition-colors"
                     >
-                      Nâng cấp ngay <span className="ml-1">^</span>
+                      Upgrade now <span className="ml-1">^</span>
                     </Link>
                   </div>
 
                   <div className="px-5 py-4 flex items-center justify-between border-b border-gray-800">
                     <div className="flex items-center gap-3">
                       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                      <span className="text-gray-300 font-medium text-sm">Số dư</span>
+                      <span className="text-gray-300 font-medium text-sm">Balance</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-yellow-500">0 <span className="w-5 h-5 inline-flex items-center justify-center bg-[#2a2d36] rounded-full text-[10px] ml-1">R</span></span>
                       <button className="bg-white text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-gray-200 transition-colors">
-                        <span>+</span> Nạp
+                        <span>+</span> Deposit
                       </button>
                     </div>
                   </div>
@@ -473,15 +473,15 @@ const Header = () => {
                   <div className="flex flex-col py-2">
                     <Link to="/watchlist" className="px-5 py-3 flex items-center gap-4 hover:bg-gray-800 transition-colors text-gray-300 hover:text-white" onClick={() => setProfileMenuOpen(false)}>
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                      <span className="text-sm font-medium">Yêu thích</span>
+                      <span className="text-sm font-medium">Watchlist</span>
                     </Link>
                     <Link to="/history" className="px-5 py-3 flex items-center gap-4 hover:bg-gray-800 transition-colors text-gray-300 hover:text-white" onClick={() => setProfileMenuOpen(false)}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                      <span className="text-sm font-medium">Xem tiếp</span>
+                      <span className="text-sm font-medium">Watch History</span>
                     </Link>
                     <button onClick={() => { setProfileMenuOpen(false); setProfileOpen(true); }} className="px-5 py-3 flex items-center gap-4 hover:bg-gray-800 transition-colors text-gray-300 hover:text-white w-full text-left">
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                      <span className="text-sm font-medium">Tài khoản</span>
+                      <span className="text-sm font-medium">Account</span>
                     </button>
                   </div>
                   
@@ -500,7 +500,7 @@ const Header = () => {
                       className="px-5 py-3 flex items-center gap-4 hover:bg-gray-800 transition-colors text-gray-300 hover:text-white w-full text-left"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-                      <span className="text-sm font-medium">Thoát</span>
+                      <span className="text-sm font-medium">Logout</span>
                     </button>
                   </div>
                 </div>
@@ -511,7 +511,7 @@ const Header = () => {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5Zm0 2c-3.866 0-7 3.134-7 7h2c0-2.757 2.243-5 5-5s5 2.243 5 5h2c0-3.866-3.134-7-7-7Z" />
               </svg>
-              <span>Thành viên</span>
+              <span>Member</span>
             </Link>
           )}
         </div>

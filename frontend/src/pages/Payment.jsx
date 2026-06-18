@@ -58,7 +58,7 @@ const Payment = () => {
       setPaymentStatus('PENDING');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Có lỗi xảy ra khi tạo thanh toán.');
+      setError(err.response?.data?.message || 'An error occurred while creating the payment.');
     } finally {
       setLoading(false);
     }
@@ -83,11 +83,11 @@ const Payment = () => {
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/>
             </svg>
-            TÀI KHOẢN ROX
+            ROX ACCOUNT
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Nâng cấp trải nghiệm điện ảnh</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Upgrade your cinematic experience</h1>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Không quảng cáo. Chất lượng 4K. Truy cập toàn bộ kho phim độc quyền. Hủy bất cứ lúc nào.
+            Ad-free. 4K Quality. Access to all exclusive movies. Cancel anytime.
           </p>
         </div>
 
@@ -111,8 +111,8 @@ const Payment = () => {
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-200">Gói 1 tháng</h3>
-                  <p className="text-sm text-gray-400 mt-1">Linh hoạt hàng tháng</p>
+                  <h3 className="text-xl font-bold text-gray-200">1 Month Plan</h3>
+                  <p className="text-sm text-gray-400 mt-1">Monthly flexibility</p>
                 </div>
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedPlan === 'MONTHLY' ? 'border-yellow-500' : 'border-gray-600'}`}>
                   {selectedPlan === 'MONTHLY' && <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>}
@@ -120,7 +120,7 @@ const Payment = () => {
               </div>
               <div className="mt-8">
                 <span className="text-4xl font-bold text-white">100.000đ</span>
-                <span className="text-gray-400"> / tháng</span>
+                <span className="text-gray-400"> / month</span>
               </div>
             </div>
 
@@ -134,12 +134,12 @@ const Payment = () => {
               }`}
             >
               <div className="absolute -top-4 right-6 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                TIẾT KIỆM 16%
+                SAVE 16%
               </div>
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-200">Gói 1 năm</h3>
-                  <p className="text-sm text-gray-400 mt-1">Cam kết dài lâu, giá tốt nhất</p>
+                  <h3 className="text-xl font-bold text-gray-200">1 Year Plan</h3>
+                  <p className="text-sm text-gray-400 mt-1">Long-term commitment, best price</p>
                 </div>
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedPlan === 'YEARLY' ? 'border-yellow-500' : 'border-gray-600'}`}>
                   {selectedPlan === 'YEARLY' && <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>}
@@ -147,7 +147,7 @@ const Payment = () => {
               </div>
               <div className="mt-8">
                 <span className="text-4xl font-bold text-white">1.000.000đ</span>
-                <span className="text-gray-400"> / năm</span>
+                <span className="text-gray-400"> / year</span>
               </div>
             </div>
 
@@ -163,10 +163,10 @@ const Payment = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Đang xử lý...
+                    Processing...
                   </>
                 ) : (
-                  <>Tiếp tục thanh toán <span className="text-xl">→</span></>
+                  <>Continue to payment <span className="text-xl">→</span></>
                 )}
               </button>
             </div>
@@ -181,15 +181,15 @@ const Payment = () => {
                 </svg>
               </div>
             </div>
-            <h2 className="text-3xl font-bold mb-4 text-white">Thanh toán thành công!</h2>
+            <h2 className="text-3xl font-bold mb-4 text-white">Payment successful!</h2>
             <p className="text-gray-400 text-lg mb-8">
-              Chào mừng bạn đến với tài khoản RoX. Trải nghiệm xem phim không giới hạn đã sẵn sàng.
+              Welcome to your RoX account. Unlimited movie experience is ready.
             </p>
             <button 
               onClick={() => navigate('/')}
               className="bg-yellow-500 hover:bg-yellow-400 text-black px-10 py-3 rounded-full font-bold text-lg transition-colors"
             >
-              Bắt đầu xem phim
+              Start watching movies
             </button>
           </div>
         ) : (
@@ -199,7 +199,7 @@ const Payment = () => {
             {/* Left: QR Code */}
             <div className="flex-1 w-full flex flex-col items-center">
               <div className="bg-white p-4 rounded-2xl mb-6 shadow-[0_0_40px_rgba(255,255,255,0.1)]">
-                <img src={paymentInfo.qrImageUrl} alt="QR Code Thanh Toán" className="w-64 h-64 object-contain" />
+                <img src={paymentInfo.qrImageUrl} alt="Payment QR Code" className="w-64 h-64 object-contain" />
               </div>
               
               <div className="flex items-center gap-3 text-yellow-500">
@@ -207,32 +207,32 @@ const Payment = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span className="font-medium">Đang chờ thanh toán...</span>
+                <span className="font-medium">Waiting for payment...</span>
               </div>
             </div>
 
             {/* Right: Transfer Details */}
             <div className="flex-1 w-full">
-              <h3 className="text-xl font-bold mb-6 text-gray-200">Hoặc chuyển khoản thủ công</h3>
+              <h3 className="text-xl font-bold mb-6 text-gray-200">Or transfer manually</h3>
               
               <div className="space-y-4">
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-gray-800 flex justify-between items-center group">
                   <div>
-                    <p className="text-gray-500 text-xs mb-1 uppercase font-bold tracking-wider">Ngân hàng</p>
+                    <p className="text-gray-500 text-xs mb-1 uppercase font-bold tracking-wider">Bank</p>
                     <p className="font-medium text-gray-200">{paymentInfo.bank}</p>
                   </div>
                 </div>
 
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-gray-800 flex justify-between items-center group">
                   <div>
-                    <p className="text-gray-500 text-xs mb-1 uppercase font-bold tracking-wider">Chủ tài khoản</p>
+                    <p className="text-gray-500 text-xs mb-1 uppercase font-bold tracking-wider">Account holder</p>
                     <p className="font-medium text-gray-200">{paymentInfo.accountName}</p>
                   </div>
                 </div>
 
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-gray-800 flex justify-between items-center group">
                   <div>
-                    <p className="text-gray-500 text-xs mb-1 uppercase font-bold tracking-wider">Số tài khoản</p>
+                    <p className="text-gray-500 text-xs mb-1 uppercase font-bold tracking-wider">Account number</p>
                     <p className="font-bold text-xl text-yellow-500">{paymentInfo.accountNumber}</p>
                   </div>
                   <button 
@@ -246,7 +246,7 @@ const Payment = () => {
 
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-gray-800 flex justify-between items-center group">
                   <div>
-                    <p className="text-gray-500 text-xs mb-1 uppercase font-bold tracking-wider">Số tiền</p>
+                    <p className="text-gray-500 text-xs mb-1 uppercase font-bold tracking-wider">Amount</p>
                     <p className="font-bold text-xl text-green-400">{formatCurrency(paymentInfo.amount)}</p>
                   </div>
                   <button 
@@ -260,7 +260,7 @@ const Payment = () => {
 
                 <div className="bg-yellow-500/10 p-4 rounded-xl border border-yellow-500/30 flex justify-between items-center group">
                   <div>
-                    <p className="text-yellow-500/70 text-xs mb-1 uppercase font-bold tracking-wider">Nội dung chuyển khoản (Bắt buộc)</p>
+                    <p className="text-yellow-500/70 text-xs mb-1 uppercase font-bold tracking-wider">Transfer content (Required)</p>
                     <p className="font-bold text-xl text-yellow-500">{paymentInfo.transferContent}</p>
                   </div>
                   <button 
@@ -273,7 +273,7 @@ const Payment = () => {
                 </div>
                 
                 <p className="text-xs text-red-400 mt-4 italic text-center">
-                  * Vui lòng chuyển đúng nội dung để hệ thống tự động kích hoạt tài khoản.
+                  * Please transfer with the exact content so the system can automatically activate your account.
                 </p>
               </div>
 

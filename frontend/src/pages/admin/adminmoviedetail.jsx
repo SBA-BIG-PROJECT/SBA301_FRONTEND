@@ -119,12 +119,12 @@ const AdminMovieDetail = () => {
       };
 
       const updated = await adminService.updateMovie(movieForm.tmdbId, data);
-      showToast('success', 'Cập nhật phim thành công!');
+      showToast('success', 'Movie updated successfully!');
       setMovie(updated);
       setIsEditModalOpen(false);
     } catch (err) {
       console.error('Error saving movie details:', err);
-      showToast('error', err?.response?.data?.message || 'Lưu thông tin phim thất bại.');
+      showToast('error', err?.response?.data?.message || 'Failed to save movie information.');
     } finally {
       setSaving(false);
     }
@@ -145,7 +145,7 @@ const AdminMovieDetail = () => {
       }
     } catch (error) {
       console.error('Error toggling movie status:', error);
-      showToast('error', 'Không thể cập nhật trạng thái phim.');
+      showToast('error', 'Cannot update movie status.');
     }
   };
 

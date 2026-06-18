@@ -38,13 +38,13 @@ const Genre = () => {
           return
         }
 
-        // Lấy danh sách genres từ backend (fallback là mảng rỗng nếu chưa có api)
+        // Get genres from backend (fallback to empty array if no api)
         const allGenres = genresData || []
         const match = allGenres.find((genre) => genre.id === genreId)
 
         setGenreName(match?.name || 'Genre')
         
-        // Backend trả về PageResponse<MovieDto> có thuộc tính content
+        // Backend returns PageResponse<MovieDto> with content property
         setMovies(moviesData?.content || [])
       } catch (error) {
         console.error(`Error fetching genre: ${error}`)

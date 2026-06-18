@@ -2,13 +2,13 @@ import apiClient from './api'
 
 /**
  * Movie Service
- * Xử lý các API liên quan đến movies
+ * Handle API calls related to movies
  * 
- * STRATEGY: Ưu tiên Backend API, fallback to TMDB nếu cần
+ * STRATEGY: Prioritize Backend API, fallback to TMDB if needed
  */
 const movieService = {
   /**
-   * Lấy danh sách movies với phân trang và tìm kiếm
+   * Get movies list with pagination and search
    * GET /movies
    * @param {Object} params - { page, size, search }
    * @returns {Promise} PageResponse<MovieDto>
@@ -24,7 +24,7 @@ const movieService = {
   },
 
   /**
-   * Lấy chi tiết movie theo ID
+   * Get movie detail by ID
    * GET /movies/{id}
    * @param {number} movieId
    * @returns {Promise} MovieDetailDto
@@ -35,9 +35,9 @@ const movieService = {
   },
 
   /**
-   * Tìm kiếm movies
+   * Search movies
    * GET /movies?search=query
-   * @param {string} query - Từ khóa tìm kiếm
+   * @param {string} query - Search keyword
    * @param {number} page
    * @param {number} size
    * @returns {Promise} PageResponse<MovieDto>
@@ -47,15 +47,15 @@ const movieService = {
   },
 
   /**
-   * Lấy trending movies
-   * Note: Backend cần implement endpoint này
+   * Get trending movies
+   * Note: Backend needs to implement this endpoint
    * @param {number} page
    * @param {number} size
    * @returns {Promise} PageResponse<MovieDto>
    */
   async getTrending({ page = 0, size = 20 } = {}) {
     // TODO: Backend needs GET /movies/trending endpoint
-    // Workaround: Gọi /movies và filter/sort
+    // Workaround: Call /movies and filter/sort
     const response = await apiClient.get('/movies', { 
       params: { page, size } 
     })
@@ -63,8 +63,8 @@ const movieService = {
   },
 
   /**
-   * Lấy top rated movies
-   * Note: Backend cần implement endpoint này
+   * Get top rated movies
+   * Note: Backend needs to implement this endpoint
    * @param {number} page
    * @param {number} size
    * @returns {Promise} PageResponse<MovieDto>
@@ -78,8 +78,8 @@ const movieService = {
   },
 
   /**
-   * Lấy now playing movies
-   * Note: Backend cần implement endpoint này
+   * Get now playing movies
+   * Note: Backend needs to implement this endpoint
    * @param {number} page
    * @param {number} size
    * @returns {Promise} PageResponse<MovieDto>
@@ -93,8 +93,8 @@ const movieService = {
   },
 
   /**
-   * Lấy upcoming movies
-   * Note: Backend cần implement endpoint này
+   * Get upcoming movies
+   * Note: Backend needs to implement this endpoint
    * @param {number} page
    * @param {number} size
    * @returns {Promise} PageResponse<MovieDto>
@@ -108,8 +108,8 @@ const movieService = {
   },
 
   /**
-   * Lấy movies theo genre
-   * Note: Backend cần implement endpoint này
+   * Get movies by genre
+   * Note: Backend needs to implement this endpoint
    * @param {number} genreId
    * @param {number} page
    * @param {number} size
@@ -124,8 +124,8 @@ const movieService = {
   },
 
   /**
-   * Lấy all genres
-   * Note: Backend cần implement endpoint này
+   * Get all genres
+   * Note: Backend needs to implement this endpoint
    * @returns {Promise} Array<{id, name}>
    */
   async getGenres() {

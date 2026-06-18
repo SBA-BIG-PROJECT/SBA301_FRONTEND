@@ -2,11 +2,11 @@ import apiClient from './api'
 
 /**
  * Review Service
- * Xử lý các API liên quan đến reviews và ratings
+ * Handle API calls related to reviews and ratings
  */
 const reviewService = {
   /**
-   * Tạo review mới cho movie
+   * Create new review for movie
    * POST /movies/{movieId}/reviews
    * @param {number} movieId
    * @param {Object} data - { rating, comment }
@@ -18,7 +18,7 @@ const reviewService = {
   },
 
   /**
-   * Lấy danh sách reviews của movie
+   * Get movie's reviews
    * GET /movies/{movieId}/reviews
    * @param {number} movieId
    * @param {Object} params - { page, size }
@@ -32,7 +32,7 @@ const reviewService = {
   },
 
   /**
-   * Lấy rating summary của movie
+   * Get movie rating summary
    * GET /movies/{movieId}/rating
    * @param {number} movieId
    * @returns {Promise} RatingSummaryDto { averageRating, totalReviews }
@@ -43,7 +43,7 @@ const reviewService = {
   },
 
   /**
-   * Cập nhật review
+   * Update review
    * PUT /reviews/{reviewId}
    * @param {number} reviewId
    * @param {Object} data - { rating, comment }
@@ -55,7 +55,7 @@ const reviewService = {
   },
 
   /**
-   * Xóa review
+   * Delete review
    * DELETE /reviews/{reviewId}
    * @param {number} reviewId
    * @returns {Promise}

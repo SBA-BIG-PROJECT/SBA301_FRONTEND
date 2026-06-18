@@ -2,11 +2,11 @@ import apiClient from './api'
 
 /**
  * Authentication Service
- * Xử lý các API liên quan đến authentication
+ * Handle API calls related to authentication
  */
 const authService = {
   /**
-   * Đăng ký tài khoản mới
+   * Register new account
    * POST /auth/register
    * @param {Object} data - { username, email, password, fullName }
    * @returns {Promise} AuthResponse { user, accessToken, refreshToken }
@@ -14,7 +14,7 @@ const authService = {
   async register(data) {
     const response = await apiClient.post('/auth/register', data)
 
-    // Lưu token và user info
+    // Save token and user info
     if (response.data) {
       const accessToken = response.data.token || response.data.accessToken
       const refreshToken = response.data.refreshToken
@@ -28,7 +28,7 @@ const authService = {
   },
 
   /**
-   * Đăng nhập
+   * Login
    * POST /auth/login
    * @param {Object} credentials - { username, password }
    * @returns {Promise} AuthResponse { user, accessToken, refreshToken }
@@ -36,7 +36,7 @@ const authService = {
   async login(credentials) {
     const response = await apiClient.post('/auth/login', credentials)
 
-    // Lưu token và user info
+    // Save token and user info
     if (response.data) {
       const accessToken = response.data.token || response.data.accessToken
       const refreshToken = response.data.refreshToken
@@ -58,7 +58,7 @@ const authService = {
   async refreshToken(refreshToken) {
     const response = await apiClient.post('/auth/refresh', { refreshToken })
 
-    // Cập nhật token mới
+    // Update new token
     if (response.data) {
       const accessToken = response.data.token || response.data.accessToken
       const newRefreshToken = response.data.refreshToken
@@ -70,7 +70,7 @@ const authService = {
   },
 
   /**
-   * Đăng xuất
+   * Logout
    * POST /auth/logout
    * @param {string} refreshToken
    * @returns {Promise}
@@ -79,7 +79,7 @@ const authService = {
     try {
       await apiClient.post('/auth/logout', { refreshToken })
     } finally {
-      // Xóa token và user info
+      // Remove token and user info
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
@@ -87,8 +87,8 @@ const authService = {
   },
 
   /**
-   * Lấy thông tin user hiện tại từ localStorage
-   * @returns {Object|null} User object hoặc null
+   * Get current user info from localStorage
+   * @returns {Object|null} User object or null
    */
   getCurrentUser() {
     try {
@@ -101,17 +101,17 @@ const authService = {
   },
 
   /**
-   * Kiểm tra user có đang đăng nhập không và token còn hợp lệ không
+   * Check if user is logged in and token is valid
    * @returns {boolean}
    */
   isAuthenticated() {
     const token = localStorage.getItem('access_token')
     if (!token || token === 'undefined') return false
 
-    // Kiểm tra xem token có đúng định dạng JWT (3 phần ngăn cách bởi dấu chấm) không
+    // Check if token is in valid JWT format (3 parts separated by dots)
     const parts = token.split('.')
     if (parts.length !== 3) {
-      // Token không phải JWT chuẩn — chỉ cần có token là coi như authenticated
+      // Token is not standard JWT - if token exists, consider it authenticated
       return true
     }
 

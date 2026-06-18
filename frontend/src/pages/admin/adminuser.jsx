@@ -108,7 +108,7 @@ const AdminUser = () => {
                 fetchUsers();
             } catch (err) {
                 console.error(`Error ${action}ing user`, err);
-                showToast('error', `Không thể ${action === 'disable' ? 'vô hiệu hóa' : 'kích hoạt'} tài khoản.`);
+                showToast('error', `Cannot ${action === 'disable' ? 'disable' : 'activate'} account.`);
             }
         }
     };
@@ -121,7 +121,7 @@ const AdminUser = () => {
                 fetchUsers();
             } catch (err) {
                 console.error('Error changing user role', err);
-                showToast('error', 'Thay đổi quyền người dùng thất bại.');
+                showToast('error', 'Failed to change user role.');
             }
         }
     };
@@ -158,7 +158,7 @@ const AdminUser = () => {
             fetchUsers();
         } catch (err) {
             console.error("Failed to update user:", err);
-            showToast('error', 'Cập nhật người dùng thất bại.');
+            showToast('error', 'Failed to update user.');
         } finally {
             setSaving(false);
         }

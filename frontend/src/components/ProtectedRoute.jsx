@@ -3,7 +3,7 @@ import { useAuth } from '../hooks'
 
 /**
  * Protected Route Component
- * Bảo vệ routes yêu cầu authentication
+ * Protect routes requiring authentication
  * 
  * Usage:
  * <Route path="/watchlist" element={
