@@ -10,7 +10,7 @@ const AdminMovies = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
-  const [size] = useState(20);
+  const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
@@ -426,15 +426,16 @@ const AdminMovies = () => {
                     <button 
                       onClick={() => setPage(Math.max(0, page - 1))}
                       disabled={page === 0}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#334155] hover:bg-[#1E293B] hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none"
+                      className="h-7 px-2.5 flex items-center gap-1 rounded-md border border-[#334155] text-xs font-medium text-[#94A3B8] hover:bg-[#1E293B] hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none"
                     >
-                      <span className="material-symbols-outlined text-xs">chevron_left</span>
+                      <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+                      <span>Prev</span>
                     </button>
                     
                     {getPageNumbers().map((pageNum, idx) => {
                       if (pageNum === '...') {
                         return (
-                          <span key={`dots-${idx}`} className="w-7 h-7 flex items-center justify-center text-[#94a3b8] text-xs">
+                          <span key={`dots-${idx}`} className="h-7 px-1 flex items-end justify-center text-[#94a3b8] text-xs">
                             ...
                           </span>
                         );
@@ -444,7 +445,7 @@ const AdminMovies = () => {
                         <button
                           key={pageNum}
                           onClick={() => setPage(pageNum)}
-                          className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-semibold transition-all ${
+                          className={`h-7 min-w-[28px] px-2 flex items-center justify-center rounded-md text-xs font-medium transition-all ${
                             isCurrent 
                               ? 'bg-[#E50914] text-white shadow-md shadow-[#E50914]/25' 
                               : 'border border-[#334155] text-[#94A3B8] hover:bg-[#1E293B] hover:text-white'
@@ -458,9 +459,10 @@ const AdminMovies = () => {
                     <button 
                       onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                       disabled={page >= totalPages - 1}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#334155] hover:bg-[#1E293B] hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none"
+                      className="h-7 px-2.5 flex items-center gap-1 rounded-md border border-[#334155] text-xs font-medium text-[#94A3B8] hover:bg-[#1E293B] hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none"
                     >
-                      <span className="material-symbols-outlined text-xs">chevron_right</span>
+                      <span>Next</span>
+                      <span className="material-symbols-outlined text-[16px]">chevron_right</span>
                     </button>
                   </div>
                 </div>
