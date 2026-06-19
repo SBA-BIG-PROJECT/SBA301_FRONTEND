@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import AdminTaskbar from './admintaskbar.jsx';
 import adminService from '../../services/adminService';
 import { useToast, ToastContainer } from '../../components/Toast.jsx';
+import ConfirmModal from '../../components/ConfirmModal.jsx';
 
 const AdminMovies = () => {
   const { toasts, showToast, closeToast } = useToast();
@@ -14,6 +15,15 @@ const AdminMovies = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    action: null,
+    confirmText: '',
+    confirmColor: ''
+  });
+
   // Filters
   const [search, setSearch] = useState('');
   const [isActive, setIsActive] = useState('all');
@@ -24,6 +34,8 @@ const AdminMovies = () => {
   const [allGenres, setAllGenres] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadingBackdrop, setUploadingBackdrop] = useState(false);
   const [movieForm, setMovieForm] = useState({
     tmdbId: '',
     title: '',
@@ -37,6 +49,26 @@ const AdminMovies = () => {
     genreIds: [],
     categoryIds: []
   });
+
+  const handleFileUpload = async (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      if (field === 'posterPath') setUploadingPoster(true);
+      else setUploadingBackdrop(true);
+
+      const response = await adminService.uploadImage(file);
+      setMovieForm(prev => ({ ...prev, [field]: response.url }));
+      showToast('success', 'Image uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      showToast('error', 'Failed to upload image.');
+    } finally {
+      if (field === 'posterPath') setUploadingPoster(false);
+      else setUploadingBackdrop(false);
+      e.target.value = ''; // Reset file input
+    }
+  };
 
   const getPageNumbers = () => {
     const pageNumbers = [];
@@ -146,7 +178,7 @@ const AdminMovies = () => {
       overview: movie.overview || '',
       posterPath: movie.posterPath || '',
       backdropPath: movie.backdropPath || '',
-      releaseDate: movie.releaseDate || '',
+      releaseDate: movie.releaseDate ? movie.releaseDate.substring(0, 16) : '',
       voteAverage: movie.voteAverage || '',
       voteCount: movie.voteCount || '',
       trailerUrl: movie.trailerUrl || '',
@@ -213,22 +245,45 @@ const AdminMovies = () => {
     }
   };
 
-  const handleToggleActive = async (tmdbId, currentActive) => {
-    try {
-      if (currentActive) {
-        if (window.confirm('Are you sure you want to deactivate this movie?')) {
-          await adminService.deleteMovie(tmdbId);
-          fetchMovies();
-        }
-      } else {
-        if (window.confirm('Are you sure you want to restore this movie?')) {
-          await adminService.restoreMovie(tmdbId);
-          fetchMovies();
-        }
-      }
-    } catch (err) {
-      console.error('Error toggling movie status:', err);
-      showToast('error', 'Cannot update movie status.');
+  const handleToggleActive = (tmdbId, currentActive) => {
+    if (currentActive) {
+      setConfirmModal({
+        isOpen: true,
+        title: 'Deactivate Movie',
+        message: 'Are you sure you want to deactivate this movie?',
+        action: async () => {
+          try {
+            await adminService.deleteMovie(tmdbId);
+            fetchMovies();
+          } catch (err) {
+            console.error('Error toggling movie status:', err);
+            showToast('error', 'Cannot update movie status.');
+          } finally {
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          }
+        },
+        confirmText: 'Deactivate',
+        confirmColor: 'bg-red-600'
+      });
+    } else {
+      setConfirmModal({
+        isOpen: true,
+        title: 'Restore Movie',
+        message: 'Are you sure you want to restore this movie?',
+        action: async () => {
+          try {
+            await adminService.restoreMovie(tmdbId);
+            fetchMovies();
+          } catch (err) {
+            console.error('Error toggling movie status:', err);
+            showToast('error', 'Cannot update movie status.');
+          } finally {
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          }
+        },
+        confirmText: 'Restore',
+        confirmColor: 'bg-emerald-600 shadow-emerald-600/20'
+      });
     }
   };
 
@@ -353,7 +408,7 @@ const AdminMovies = () => {
                                   <img 
                                     alt={movie.title} 
                                     className="w-full h-full object-cover" 
-                                    src={movie.posterPath ? `https://image.tmdb.org/t/p/w200${movie.posterPath}` : 'https://via.placeholder.com/200x300?text=No+Poster'}
+                                    src={movie.posterPath ? (movie.posterPath.startsWith('http') ? movie.posterPath : `https://image.tmdb.org/t/p/w200${movie.posterPath}`) : 'https://via.placeholder.com/200x300?text=No+Poster'}
                                     onError={(e) => { e.target.src = 'https://via.placeholder.com/200x300?text=No+Poster'; }}
                                   />
                                 </div>
@@ -362,7 +417,7 @@ const AdminMovies = () => {
                                     {movie.title}
                                   </h3>
                                   <div className="text-[12px] text-[#94A3B8] flex gap-[4px] items-center mt-[4px]">
-                                    <span>{movie.releaseDate ? movie.releaseDate.substring(0, 4) : 'N/A'}</span>
+                                    <span>{movie.releaseDate ? movie.releaseDate.substring(0, 10) : 'N/A'}</span>
                                   </div>
                                 </div>
                               </div>
@@ -522,7 +577,7 @@ const AdminMovies = () => {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Release Date</label>
                   <input 
-                    type="date" 
+                    type="datetime-local" 
                     value={movieForm.releaseDate} 
                     onChange={(e) => setMovieForm(prev => ({ ...prev, releaseDate: e.target.value }))}
                     className="bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm"
@@ -566,24 +621,46 @@ const AdminMovies = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Poster Path</label>
-                  <input 
-                    type="text" 
-                    value={movieForm.posterPath} 
-                    onChange={(e) => setMovieForm(prev => ({ ...prev, posterPath: e.target.value }))}
-                    className="bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm"
-                    placeholder="e.g. /or06509IRZ11Bebyp11xCeOO14C.jpg"
-                  />
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Poster Path</label>
+                    <label className="text-[10px] text-[#E50914] cursor-pointer hover:underline flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">upload</span>
+                      Upload Local
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'posterPath')} disabled={uploadingPoster} />
+                    </label>
+                  </div>
+                  <div className="relative w-full">
+                    <input 
+                      type="text" 
+                      value={movieForm.posterPath} 
+                      onChange={(e) => setMovieForm(prev => ({ ...prev, posterPath: e.target.value }))}
+                      className="w-full bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm pr-8"
+                      placeholder="e.g. /or06509IRZ11Bebyp11xCeOO14C.jpg"
+                      disabled={uploadingPoster}
+                    />
+                    {uploadingPoster && <span className="absolute right-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#94A3B8] animate-spin text-[16px]">progress_activity</span>}
+                  </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Backdrop Path</label>
-                  <input 
-                    type="text" 
-                    value={movieForm.backdropPath} 
-                    onChange={(e) => setMovieForm(prev => ({ ...prev, backdropPath: e.target.value }))}
-                    className="bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm"
-                    placeholder="e.g. /7D643gUjV49v88c5rX65l7B0oT9.jpg"
-                  />
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Backdrop Path</label>
+                    <label className="text-[10px] text-[#E50914] cursor-pointer hover:underline flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">upload</span>
+                      Upload Local
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'backdropPath')} disabled={uploadingBackdrop} />
+                    </label>
+                  </div>
+                  <div className="relative w-full">
+                    <input 
+                      type="text" 
+                      value={movieForm.backdropPath} 
+                      onChange={(e) => setMovieForm(prev => ({ ...prev, backdropPath: e.target.value }))}
+                      className="w-full bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm pr-8"
+                      placeholder="e.g. /7D643gUjV49v88c5rX65l7B0oT9.jpg"
+                      disabled={uploadingBackdrop}
+                    />
+                    {uploadingBackdrop && <span className="absolute right-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#94A3B8] animate-spin text-[16px]">progress_activity</span>}
+                  </div>
                 </div>
               </div>
 
@@ -659,6 +736,17 @@ const AdminMovies = () => {
           </div>
         </div>
       )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.action}
+        onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        confirmText={confirmModal.confirmText}
+        confirmColor={confirmModal.confirmColor}
+      />
     </div>
   );
 };

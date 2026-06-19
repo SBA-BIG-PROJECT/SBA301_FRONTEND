@@ -109,7 +109,7 @@ const SearchPage = () => {
                     Details
                   </Link>
                   <Link className="btn btn--primary" to={`/watch/${movie.id}`}>
-                    Trailer
+                    Watch Now
                   </Link>
                 </div>
               </div>

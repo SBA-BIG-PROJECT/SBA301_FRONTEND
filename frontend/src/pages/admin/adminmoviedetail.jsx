@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AdminTaskbar from './admintaskbar.jsx';
 import { adminService } from '../../services';
 import { useToast, ToastContainer } from '../../components/Toast.jsx';
+import ConfirmModal from '../../components/ConfirmModal.jsx';
 
 const AdminMovieDetail = () => {
   const { id } = useParams();
@@ -10,6 +11,14 @@ const AdminMovieDetail = () => {
   const { toasts, showToast, closeToast } = useToast();
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    action: null,
+    confirmText: '',
+    confirmColor: ''
+  });
 
   // Movie Form Modal States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -30,18 +39,19 @@ const AdminMovieDetail = () => {
     categoryIds: []
   });
 
+  const fetchMovieDetail = async () => {
+    try {
+      setLoading(true);
+      const data = await adminService.getMovieDetail(id);
+      setMovie(data);
+    } catch (error) {
+      console.error('Error fetching movie detail:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchMovieDetail = async () => {
-      try {
-        setLoading(true);
-        const data = await adminService.getMovieDetail(id);
-        setMovie(data);
-      } catch (error) {
-        console.error('Error fetching movie detail:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     if (id) {
       fetchMovieDetail();
     }
@@ -71,7 +81,7 @@ const AdminMovieDetail = () => {
       overview: movie.overview || '',
       posterPath: movie.posterPath || '',
       backdropPath: movie.backdropPath || '',
-      releaseDate: movie.releaseDate || '',
+      releaseDate: movie.releaseDate ? movie.releaseDate.substring(0, 16) : '',
       voteAverage: movie.voteAverage || '',
       voteCount: movie.voteCount || '',
       trailerUrl: movie.trailerUrl || '',
@@ -130,22 +140,45 @@ const AdminMovieDetail = () => {
     }
   };
 
-  const handleToggleActive = async () => {
-    try {
-      if (movie.isActive) {
-        if (window.confirm('Are you sure you want to deactivate this movie?')) {
-          await adminService.deleteMovie(id);
-          setMovie({ ...movie, isActive: false });
-        }
-      } else {
-        if (window.confirm('Are you sure you want to restore this movie?')) {
-          await adminService.restoreMovie(id);
-          setMovie({ ...movie, isActive: true });
-        }
-      }
-    } catch (error) {
-      console.error('Error toggling movie status:', error);
-      showToast('error', 'Cannot update movie status.');
+  const handleToggleActive = () => {
+    if (movie.isActive) {
+      setConfirmModal({
+        isOpen: true,
+        title: 'Deactivate Movie',
+        message: 'Are you sure you want to deactivate this movie? It will no longer be visible to regular users.',
+        action: async () => {
+          try {
+            await adminService.deleteMovie(id);
+            fetchMovieDetail();
+          } catch (err) {
+            console.error('Error deactivating movie:', err);
+            showToast('error', 'Cannot update movie status.');
+          } finally {
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          }
+        },
+        confirmText: 'Deactivate',
+        confirmColor: 'bg-red-600'
+      });
+    } else {
+      setConfirmModal({
+        isOpen: true,
+        title: 'Restore Movie',
+        message: 'Are you sure you want to restore this movie? It will become visible to users again.',
+        action: async () => {
+          try {
+            await adminService.restoreMovie(id);
+            fetchMovieDetail();
+          } catch (err) {
+            console.error('Error restoring movie:', err);
+            showToast('error', 'Cannot update movie status.');
+          } finally {
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          }
+        },
+        confirmText: 'Restore',
+        confirmColor: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+      });
     }
   };
 
@@ -209,7 +242,7 @@ const AdminMovieDetail = () => {
             <img 
               alt="Movie Backdrop" 
               className="w-full h-full object-cover opacity-40 object-top" 
-              src={movie.backdropPath ? `https://image.tmdb.org/t/p/original${movie.backdropPath}` : 'https://via.placeholder.com/1920x1080?text=No+Backdrop'}
+              src={movie.backdropPath ? (movie.backdropPath.startsWith('http') ? movie.backdropPath : `https://image.tmdb.org/t/p/original${movie.backdropPath}`) : 'https://via.placeholder.com/1920x1080?text=No+Backdrop'}
               onError={(e) => { e.target.src = 'https://via.placeholder.com/1920x1080?text=No+Backdrop'; }}
             />
             <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #0F172A 0%, rgba(15, 23, 42, 0.4) 50%, rgba(15, 23, 42, 0) 100%)' }}></div>
@@ -222,7 +255,7 @@ const AdminMovieDetail = () => {
               <img 
                 alt="Movie Poster" 
                 className="w-full h-full object-cover" 
-                src={movie.posterPath ? `https://image.tmdb.org/t/p/w500${movie.posterPath}` : 'https://via.placeholder.com/500x750?text=No+Poster'}
+                src={movie.posterPath ? (movie.posterPath.startsWith('http') ? movie.posterPath : `https://image.tmdb.org/t/p/w500${movie.posterPath}`) : 'https://via.placeholder.com/500x750?text=No+Poster'}
                 onError={(e) => { e.target.src = 'https://via.placeholder.com/500x750?text=No+Poster'; }}
               />
             </div>
@@ -415,7 +448,7 @@ const AdminMovieDetail = () => {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Release Date</label>
                   <input 
-                    type="date" 
+                    type="datetime-local" 
                     value={movieForm.releaseDate} 
                     onChange={(e) => setMovieForm(prev => ({ ...prev, releaseDate: e.target.value }))}
                     className="bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm"
@@ -552,6 +585,17 @@ const AdminMovieDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.action}
+        onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        confirmText={confirmModal.confirmText}
+        confirmColor={confirmModal.confirmColor}
+      />
     </div>
   );
 };

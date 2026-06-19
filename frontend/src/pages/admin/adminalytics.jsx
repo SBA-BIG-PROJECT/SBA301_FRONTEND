@@ -146,7 +146,7 @@ const AdminAnalytics = () => {
                             <div key={m.tmdbId} className="px-[20px] py-[12px] flex items-center gap-[12px] hover:bg-[#334155]/30 transition-colors">
                               <span className="text-[12px] font-bold text-[#94A3B8] w-5 text-center">{idx + 1}</span>
                               {m.posterPath ? (
-                                <img src={`${TMDB_IMG}${m.posterPath}`} alt={m.title} className="w-8 h-12 object-cover rounded" />
+                                <img src={m.posterPath.startsWith('http') ? m.posterPath : `${TMDB_IMG}${m.posterPath}`} alt={m.title} className="w-8 h-12 object-cover rounded" />
                               ) : (
                                 <div className="w-8 h-12 bg-[#334155] rounded flex items-center justify-center">
                                   <span className="material-symbols-outlined text-[#94A3B8] text-[14px]">movie</span>
@@ -176,7 +176,7 @@ const AdminAnalytics = () => {
                             <div key={m.tmdbId} className="px-[20px] py-[12px] flex items-center gap-[12px] hover:bg-[#334155]/30 transition-colors">
                               <span className="text-[12px] font-bold text-[#94A3B8] w-5 text-center">{idx + 1}</span>
                               {m.posterPath ? (
-                                <img src={`${TMDB_IMG}${m.posterPath}`} alt={m.title} className="w-8 h-12 object-cover rounded" />
+                                <img src={m.posterPath.startsWith('http') ? m.posterPath : `${TMDB_IMG}${m.posterPath}`} alt={m.title} className="w-8 h-12 object-cover rounded" />
                               ) : (
                                 <div className="w-8 h-12 bg-[#334155] rounded flex items-center justify-center">
                                   <span className="material-symbols-outlined text-[#94A3B8] text-[14px]">movie</span>

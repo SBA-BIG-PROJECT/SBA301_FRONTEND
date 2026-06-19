@@ -138,10 +138,10 @@ const Detail = () => {
   }
 
   const backdrop = movie.posterPath
-    ? `${BACKDROP_BASE_URL}${movie.posterPath}`
+    ? (movie.posterPath.startsWith('http') ? movie.posterPath : `${BACKDROP_BASE_URL}${movie.posterPath}`)
     : heroImg
   const poster = movie.posterPath
-    ? `${IMAGE_BASE_URL}${movie.posterPath}`
+    ? (movie.posterPath.startsWith('http') ? movie.posterPath : `${IMAGE_BASE_URL}${movie.posterPath}`)
     : noPoster
 
   return (
@@ -190,14 +190,25 @@ const Detail = () => {
               </div>
             )}
             <div className="detail__actions">
-              <button
-                className="btn btn--primary flex items-center gap-2 bg-red-600 hover:bg-red-700"
-                type="button"
-                onClick={() => navigate(`/watch/${movie.id}`)}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                Watch Now
-              </button>
+              {movie.isLocked ? (
+                <button
+                  className="btn btn--primary flex items-center gap-2 bg-gray-500 cursor-not-allowed text-sm"
+                  type="button"
+                  disabled
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                  Available {new Date(movie.releaseDate).toLocaleString('vi-VN')}
+                </button>
+              ) : (
+                <button
+                  className="btn btn--primary flex items-center gap-2 bg-red-600 hover:bg-red-700"
+                  type="button"
+                  onClick={() => navigate(`/watch/${movie.id}`)}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  Watch Now
+                </button>
+              )}
 
               <button
                 className="btn btn--secondary flex items-center gap-2 bg-gray-600 hover:bg-gray-700 bg-opacity-70"

@@ -106,6 +106,18 @@ const adminService = {
     return response.data;
   },
 
+  // API doc: POST /api/v1/admin/movies/upload-image
+  uploadImage: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/admin/movies/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   // === Payment Management ===
   getAllPayments: async (page = 0, size = 20, status, userId, planType) => {
     const params = { page, size };

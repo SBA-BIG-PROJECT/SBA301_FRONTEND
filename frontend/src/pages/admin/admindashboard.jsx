@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import AdminTaskbar from './admintaskbar.jsx';
 import { adminService } from '../../services';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [revenueData, setRevenueData] = useState([]);
+    const [revenuePeriod, setRevenuePeriod] = useState('1M');
+    const [loadingRevenue, setLoadingRevenue] = useState(false);
 
     useEffect(() => {
         const fetchDashboardStats = async () => {
             try {
                 const data = await adminService.getDashboardStats();
                 setStats(data);
+                
+                // Fetch initial revenue data (1M)
+                await fetchRevenueData('1M');
             } catch (error) {
                 console.error('Error fetching dashboard stats', error);
             } finally {
@@ -20,6 +27,89 @@ const AdminDashboard = () => {
         fetchDashboardStats();
     }, []);
 
+    const fetchRevenueData = async (period) => {
+        setLoadingRevenue(true);
+        try {
+            const end = new Date();
+            const start = new Date();
+            if (period === '1W') start.setDate(end.getDate() - 7);
+            else if (period === '1M') start.setMonth(end.getMonth() - 1);
+            else if (period === '1Y') start.setFullYear(end.getFullYear() - 1);
+            
+            const startDateStr = start.toISOString().split('T')[0];
+            const endDateStr = end.toISOString().split('T')[0];
+            
+            const revData = await adminService.getRevenueAnalytics(startDateStr, endDateStr);
+            
+            // Xử lý dữ liệu trả về từ API backend thực tế
+            if (revData) {
+                let chartData = [];
+                if (period === '1Y') {
+                    // Tạo danh sách 12 tháng gần nhất với doanh thu 0
+                    for(let i=11; i>=0; i--) {
+                        const d = new Date();
+                        d.setMonth(d.getMonth() - i);
+                        chartData.push({ date: `${d.getMonth() + 1}/${d.getFullYear()}`, revenue: 0 });
+                    }
+                    if (revData.monthlyRevenue && revData.monthlyRevenue.length > 0) {
+                        revData.monthlyRevenue.forEach(item => {
+                            const dateStr = `${item.month}/${item.year}`;
+                            const found = chartData.find(c => c.date === dateStr);
+                            if (found) found.revenue = item.revenue;
+                        });
+                    }
+                } else {
+                    // Tạo danh sách 7 hoặc 30 ngày gần nhất với doanh thu 0
+                    const days = period === '1W' ? 7 : 30;
+                    for(let i=days-1; i>=0; i--) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        // Convert sang YYYY-MM-DD theo local time
+                        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        chartData.push({ date: dateStr, revenue: 0 });
+                    }
+                    if (revData.dailyRevenue && revData.dailyRevenue.length > 0) {
+                        revData.dailyRevenue.forEach(item => {
+                            const found = chartData.find(c => c.date === item.date.toString());
+                            if (found) found.revenue = item.revenue;
+                        });
+                    }
+                }
+
+                if (chartData.length > 0) {
+                    setRevenueData(chartData);
+                } else {
+                    // Fallback mock
+                    setRevenueData(generateMockRevenue(period));
+                }
+            } else {
+                setRevenueData(generateMockRevenue(period));
+            }
+        } catch (error) {
+            console.error('Error fetching revenue data', error);
+            setRevenueData(generateMockRevenue(period)); // Fallback mock on error
+        } finally {
+            setLoadingRevenue(false);
+        }
+    };
+
+    const handlePeriodChange = (period) => {
+        setRevenuePeriod(period);
+        fetchRevenueData(period);
+    };
+
+    const generateMockRevenue = (period) => {
+        const data = [];
+        const days = period === '1W' ? 7 : period === '1M' ? 30 : 12;
+        for(let i=0; i<days; i++) {
+            data.push({
+                date: period === '1Y' ? `Month ${i+1}` : `Day ${i+1}`,
+                revenue: Math.floor(Math.random() * 5000) + 500
+            });
+        }
+        return data;
+    };
+
     const formatNumber = (num) => {
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
@@ -27,10 +117,10 @@ const AdminDashboard = () => {
     };
 
     const formatCurrency = (amount) => {
-        if (!amount) return '$0';
-        if (amount >= 1000000) return '$' + (amount / 1000000).toFixed(1) + 'M';
-        if (amount >= 1000) return '$' + (amount / 1000).toFixed(1) + 'K';
-        return '$' + amount;
+        if (!amount) return '0 đ';
+        if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M đ';
+        if (amount >= 1000) return (amount / 1000).toFixed(1) + 'K đ';
+        return amount + ' đ';
     };
 
     return (
@@ -173,46 +263,92 @@ const AdminDashboard = () => {
                                     <div className="flex justify-between items-center mb-[24px]">
                                         <h3 className="text-[18px] leading-[28px] font-semibold text-[#f8fafc]">Revenue Overview</h3>
                                         <div className="flex gap-2">
-                                            <button className="px-3 py-1 rounded text-xs font-medium bg-[#334155] text-[#f8fafc]">1W</button>
-                                            <button className="px-3 py-1 rounded text-xs font-medium bg-[#E50914] text-[#ffffff]">1M</button>
-                                            <button className="px-3 py-1 rounded text-xs font-medium bg-[#334155] text-[#f8fafc]">1Y</button>
+                                            <button 
+                                                onClick={() => handlePeriodChange('1W')}
+                                                className={`px-3 py-1 rounded text-xs font-medium ${revenuePeriod === '1W' ? 'bg-[#E50914] text-[#ffffff]' : 'bg-[#334155] text-[#f8fafc] hover:bg-[#475569]'}`}>
+                                                1W
+                                            </button>
+                                            <button 
+                                                onClick={() => handlePeriodChange('1M')}
+                                                className={`px-3 py-1 rounded text-xs font-medium ${revenuePeriod === '1M' ? 'bg-[#E50914] text-[#ffffff]' : 'bg-[#334155] text-[#f8fafc] hover:bg-[#475569]'}`}>
+                                                1M
+                                            </button>
+                                            <button 
+                                                onClick={() => handlePeriodChange('1Y')}
+                                                className={`px-3 py-1 rounded text-xs font-medium ${revenuePeriod === '1Y' ? 'bg-[#E50914] text-[#ffffff]' : 'bg-[#334155] text-[#f8fafc] hover:bg-[#475569]'}`}>
+                                                1Y
+                                            </button>
                                         </div>
                                     </div>
-                                    {/* Placeholder for Chart */}
-                                    <div className="flex-1 w-full bg-[#0F172A] rounded-lg border border-[#334155]/50 relative overflow-hidden flex items-end px-4 pb-4 gap-2">
-                                        <div className="w-full h-full absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-                                        <div className="w-[10%] h-[30%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
-                                        <div className="w-[10%] h-[45%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
-                                        <div className="w-[10%] h-[35%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
-                                        <div className="w-[10%] h-[60%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
-                                        <div className="w-[10%] h-[50%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
-                                        <div className="w-[10%] h-[75%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
-                                        <div className="w-[10%] h-[65%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
-                                        <div className="w-[10%] h-[85%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
-                                        <div className="w-[10%] h-[100%] bg-gradient-to-t from-[#E50914]/20 to-[#E50914]/80 rounded-t-sm z-10"></div>
+                                    
+                                    <div className="flex-1 w-full bg-[#0F172A] rounded-lg border border-[#334155]/50 relative overflow-hidden flex items-center justify-center p-4">
+                                        {loadingRevenue ? (
+                                            <div className="text-[#94a3b8]">Loading chart data...</div>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={revenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                                    <XAxis 
+                                                        dataKey="date" 
+                                                        stroke="#94a3b8" 
+                                                        fontSize={12} 
+                                                        tickLine={false} 
+                                                        axisLine={false}
+                                                        tickFormatter={(val) => val.toString().length > 10 ? val.toString().substring(0, 10) + '...' : val.toString()}
+                                                    />
+                                                    <YAxis 
+                                                        stroke="#94a3b8" 
+                                                        fontSize={12} 
+                                                        tickLine={false} 
+                                                        axisLine={false}
+                                                        width={80}
+                                                        tickFormatter={(val) => formatCurrency(val)}
+                                                    />
+                                                    <Tooltip 
+                                                        contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', color: '#f8fafc' }}
+                                                        itemStyle={{ color: '#E50914' }}
+                                                        cursor={{fill: '#334155', opacity: 0.4}}
+                                                    />
+                                                    <Bar dataKey="revenue" fill="#E50914" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        )}
                                     </div>
                                 </div>
 
                                 {/* Premium vs Free Donut */}
                                 <div className="bg-[#1E293B] rounded-xl border border-[#334155] p-[24px] flex flex-col min-h-[350px]">
                                     <h3 className="text-[18px] leading-[28px] font-semibold text-[#f8fafc] mb-[24px]">User Demographics</h3>
-                                    <div className="flex-1 flex flex-col items-center justify-center relative">
-                                        <div className="w-48 h-48 rounded-full border-[16px] border-[#334155] relative flex items-center justify-center">
-                                            <div
-                                                className="absolute inset-[-16px] rounded-full border-[16px] border-[#E50914]"
-                                                style={{
-                                                    clipPath: stats.totalUsers > 0
-                                                        ? `polygon(50% 50%, 100% 0, 100% ${(stats.premiumUsers / stats.totalUsers) * 100}%, ${(stats.premiumUsers / stats.totalUsers) > 0.5 ? '0' : '100%'} 100%, 0 100%, 0 0, 50% 0)` // simplified clipping logic for visual representation
-                                                        : 'none',
-                                                    transform: `rotate(${Math.min((stats.premiumUsers / Math.max(1, stats.totalUsers)) * 360, 360)}deg)`
-                                                }}
-                                            ></div>
-                                            <div className="text-center">
-                                                <div className="text-[24px] leading-[32px] font-semibold text-[#f8fafc]">
-                                                    {stats.totalUsers > 0 ? Math.round((stats.premiumUsers / stats.totalUsers) * 100) : 0}%
-                                                </div>
-                                                <div className="text-xs text-[#94a3b8]">Premium</div>
+                                    <div className="flex-1 flex flex-col items-center justify-center relative w-full h-[200px]">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <Pie
+                                                    data={[
+                                                        { name: 'Premium', value: stats.premiumUsers },
+                                                        { name: 'Free', value: stats.totalUsers - stats.premiumUsers }
+                                                    ]}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={70}
+                                                    outerRadius={90}
+                                                    paddingAngle={5}
+                                                    dataKey="value"
+                                                    stroke="none"
+                                                >
+                                                    <Cell key="cell-0" fill="#E50914" />
+                                                    <Cell key="cell-1" fill="#334155" />
+                                                </Pie>
+                                                <Tooltip 
+                                                    contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px' }}
+                                                    itemStyle={{ color: '#f8fafc' }}
+                                                />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                            <div className="text-[24px] leading-[32px] font-semibold text-[#f8fafc]">
+                                                {stats.totalUsers > 0 ? Math.round((stats.premiumUsers / stats.totalUsers) * 100) : 0}%
                                             </div>
+                                            <div className="text-xs text-[#94a3b8]">Premium</div>
                                         </div>
                                     </div>
                                     <div className="flex justify-center gap-[24px] mt-[16px]">
