@@ -92,7 +92,8 @@ const Genre = () => {
                   title: movie.title,
                   poster_path: movie.posterPath,
                   vote_average: movie.voteAverage,
-                  release_date: movie.releaseDate
+                  release_date: movie.releaseDate,
+                  isPremium: movie.isPremium
                 }} />
               </Link>
               <div className="movie-card__actions">

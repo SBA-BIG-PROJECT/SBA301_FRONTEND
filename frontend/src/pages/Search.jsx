@@ -101,7 +101,8 @@ const SearchPage = () => {
                     poster_path: movie.posterPath,
                     vote_average: movie.voteAverage,
                     release_date: movie.releaseDate,
-                    overview: movie.overview
+                    overview: movie.overview,
+                    isPremium: movie.isPremium
                   }} />
                 </Link>
                 <div className="movie-card__actions">

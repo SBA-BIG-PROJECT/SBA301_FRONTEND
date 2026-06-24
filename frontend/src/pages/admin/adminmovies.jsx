@@ -288,6 +288,17 @@ const AdminMovies = () => {
     }
   };
 
+  const handleTogglePremium = async (tmdbId, currentPremium) => {
+    try {
+      await adminService.setMoviePremium(tmdbId, !currentPremium);
+      showToast('success', `Movie marked as ${!currentPremium ? 'Premium' : 'Standard'} successfully!`);
+      fetchMovies();
+    } catch (err) {
+      console.error('Error toggling premium status:', err);
+      showToast('error', err?.response?.data?.message || 'Failed to update premium status.');
+    }
+  };
+
   return (
     <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
       <ToastContainer toasts={toasts} onClose={closeToast} />
@@ -414,9 +425,14 @@ const AdminMovies = () => {
                                   />
                                 </div>
                                 <div>
-                                  <h3 className={`text-[18px] font-semibold text-[#f8fafc] group-hover:text-[#E50914] transition-colors ${!movie.isActive ? 'line-through decoration-[#334155]' : ''}`}>
-                                    {movie.title}
-                                  </h3>
+                                  <div className="flex items-center gap-2">
+                                    <h3 className={`text-[18px] font-semibold text-[#f8fafc] group-hover:text-[#E50914] transition-colors ${!movie.isActive ? 'line-through decoration-[#334155]' : ''}`}>
+                                      {movie.title}
+                                    </h3>
+                                    {movie.isPremium && (
+                                      <span className="bg-yellow-500/20 text-yellow-500 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border border-yellow-500/30">Premium</span>
+                                    )}
+                                  </div>
                                   <div className="text-[12px] text-[#94A3B8] flex gap-[4px] items-center mt-[4px]">
                                     <span>{movie.releaseDate ? movie.releaseDate.substring(0, 10) : 'N/A'}</span>
                                   </div>
@@ -453,6 +469,9 @@ const AdminMovies = () => {
                             </td>
                             <td className="px-[16px] py-[16px] text-right">
                               <div className="flex items-center justify-end gap-[8px] opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => handleTogglePremium(movie.tmdbId, movie.isPremium)} className={`p-1.5 rounded transition-colors cursor-pointer ${movie.isPremium ? 'text-yellow-500 hover:bg-yellow-500/10' : 'text-[#94A3B8] hover:text-yellow-500 hover:bg-[#0F172A]'}`} title={movie.isPremium ? "Remove Premium" : "Make Premium"}>
+                                  <span className="material-symbols-outlined text-[20px]">workspace_premium</span>
+                                </button>
                                 <Link to={`/admin/movies/${movie.tmdbId}`} className="p-1.5 text-[#94A3B8] hover:text-[#f8fafc] hover:bg-[#0F172A] rounded transition-colors" title="View Details">
                                   <span className="material-symbols-outlined text-[20px]">visibility</span>
                                 </Link>

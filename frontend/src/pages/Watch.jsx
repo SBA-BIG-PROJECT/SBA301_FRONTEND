@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import Spinner from '../components/Spinner.jsx'
 import { movieService, reviewService } from '../services'
 import { useHistory } from '../hooks/useHistory'
@@ -9,6 +9,7 @@ import { useToast, ToastContainer } from '../components/Toast.jsx'
 const Watch = () => {
   const { toasts, showToast, closeToast } = useToast()
   const { id } = useParams()
+  const navigate = useNavigate()
   const [movie, setMovie] = useState(null)
   const [trailerKey, setTrailerKey] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -127,6 +128,32 @@ const Watch = () => {
         <Spinner />
       ) : errorMessage ? (
         <p className="status">{errorMessage}</p>
+      ) : movie?.isLocked && movie?.requiresPremium ? (
+        <div className="watch__locked flex flex-col items-center justify-center p-20 bg-[#15161b] rounded-xl border border-gray-800 text-center">
+          <svg className="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24">
+            <defs>
+              <linearGradient id="crownGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#f59e0b"/>
+                <stop offset="100%" stopColor="#d97706"/>
+              </linearGradient>
+            </defs>
+            <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z" fill="url(#crownGrad)"/>
+          </svg>
+          <h3 className="text-2xl font-bold text-white mb-2">Premium Content</h3>
+          <p className="text-gray-400 mb-6">
+            This movie is exclusively available for Premium members. Upgrade your plan to watch.
+          </p>
+          <button
+            onClick={() => navigate('/payment')}
+            className="px-8 py-3 rounded-lg font-bold text-white text-sm transition-all hover:brightness-110 active:brightness-90 shadow-lg"
+            style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', boxShadow: '0 4px 14px rgba(245,158,11,0.3)' }}
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+              Upgrade to Premium
+            </span>
+          </button>
+        </div>
       ) : movie?.isLocked ? (
         <div className="watch__locked flex flex-col items-center justify-center p-20 bg-[#15161b] rounded-xl border border-gray-800 text-center">
           <svg className="w-16 h-16 text-gray-500 mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>

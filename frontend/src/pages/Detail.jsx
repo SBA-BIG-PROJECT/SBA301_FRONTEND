@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../hooks/useAuth'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Spinner from '../components/Spinner.jsx'
 import heroImg from '../assets/hero-img.png'
@@ -23,6 +24,7 @@ const Detail = () => {
   const [relatedMovies, setRelatedMovies] = useState([])
   const [reviews, setReviews] = useState([])
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { toasts, showToast, closeToast } = useToast()
   
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist()
@@ -162,7 +164,32 @@ const Detail = () => {
               <span>•</span>
               <span>{movie.title}</span>
             </div>
-            <h2>{movie.title}</h2>
+            <h2>
+              {movie.title}
+              {movie.requiresPremium && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginLeft: '12px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  color: '#fff',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  verticalAlign: 'middle',
+                  boxShadow: '0 2px 8px rgba(245,158,11,0.3)'
+                }}>
+                  <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 14, height: 14 }}>
+                    <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z"/>
+                  </svg>
+                  Premium
+                </span>
+              )}
+            </h2>
             <div className="detail__meta">
               <span>{movie.releaseYear || 'N/A'}</span>
               {movie.rating && (
@@ -191,7 +218,17 @@ const Detail = () => {
               </div>
             )}
             <div className="detail__actions">
-              {movie.isLocked ? (
+              {movie.isLocked && movie.requiresPremium ? (
+                <button
+                  className="btn btn--primary flex items-center gap-2 text-sm"
+                  type="button"
+                  onClick={() => navigate('/payment')}
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff' }}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+                  Upgrade to Premium
+                </button>
+              ) : movie.isLocked ? (
                 <button
                   className="btn btn--primary flex items-center gap-2 bg-gray-500 cursor-not-allowed text-sm"
                   type="button"

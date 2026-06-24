@@ -20,9 +20,38 @@ const MovieCard = ({ movie }) => {
     ? (String(poster_val).startsWith('http') ? poster_val : `${IMAGE_BASE}${String(poster_val).startsWith('/') ? '' : '/'}${poster_val}`)
     : noPoster;
 
+  const isPremium_val = movie.isPremium || movie.is_premium;
+
   return (
     <div className="movie-card">
-      <img src={posterSrc} alt={title} />
+      <div style={{ position: 'relative' }}>
+        <img src={posterSrc} alt={title} />
+        {isPremium_val && (
+          <div style={{
+            position: 'absolute',
+            top: 8,
+            left: 8,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '3px',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            color: '#fff',
+            fontSize: '10px',
+            fontWeight: '700',
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            zIndex: 5,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+          }}>
+            <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 11, height: 11 }}>
+              <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z"/>
+            </svg>
+            Premium
+          </div>
+        )}
+      </div>
 
       <div className="mt-4">
         <h3>{title}</h3>

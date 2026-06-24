@@ -2,6 +2,7 @@ import api from './api';
 
 const adminService = {
   // === Dashboard Analytics ===
+  // Backend: AnalyticsController @RequestMapping("/api/v1/admin/analytics")
   getDashboardStats: async () => {
     const response = await api.get('/admin/analytics/dashboard');
     return response.data;
@@ -24,6 +25,7 @@ const adminService = {
   },
 
   // === User Management ===
+  // Backend: UserController @RequestMapping("/api/v1/admin/users")
   getAllUsers: async (page = 0, size = 20, search, role, isPremium) => {
     const params = { page, size };
     if (search) params.search = search;
@@ -49,68 +51,75 @@ const adminService = {
     return response.data;
   },
   
-  // API doc: PUT /api/v1/admin/users/{userId}/role
+  // PUT /api/v1/admin/users/{userId}/role
   changeUserRole: async (userId, role) => {
     const response = await api.put(`/admin/users/${userId}/role`, { role });
     return response.data;
   },
 
-  // API doc: DELETE /admin/users/{userId}/premium
+  // DELETE /api/v1/admin/users/{userId}/premium
   revokePremium: async (userId) => {
     const response = await api.delete(`/admin/users/${userId}/premium`);
     return response.data;
   },
 
   // === Movie Management ===
+  // Backend: MovieController @RequestMapping("/api/v1/movies"), admin sub-paths under /admin
   getAllMovies: async (page = 0, size = 20, search, isActive) => {
     const params = { page, size };
     if (search) params.search = search;
     if (isActive !== undefined) params.isActive = isActive;
     
-    const response = await api.get('/admin/movies', { params });
+    const response = await api.get('/movies/admin', { params });
     return response.data;
   },
   
   getMovieDetail: async (tmdbId) => {
-    const response = await api.get(`/admin/movies/${tmdbId}`);
+    const response = await api.get(`/movies/admin/${tmdbId}`);
     return response.data;
   },
   
   createMovie: async (data) => {
-    const response = await api.post('/admin/movies', data);
+    const response = await api.post('/movies/admin', data);
     return response.data;
   },
   
   updateMovie: async (tmdbId, data) => {
-    const response = await api.put(`/admin/movies/${tmdbId}`, data);
+    const response = await api.put(`/movies/admin/${tmdbId}`, data);
     return response.data;
   },
   
   deleteMovie: async (tmdbId) => {
-    const response = await api.delete(`/admin/movies/${tmdbId}`);
+    const response = await api.delete(`/movies/admin/${tmdbId}`);
     return response.data;
   },
   
   restoreMovie: async (tmdbId) => {
-    const response = await api.post(`/admin/movies/${tmdbId}/restore`);
+    const response = await api.post(`/movies/admin/${tmdbId}/restore`);
     return response.data;
   },
 
   updateMovieGenres: async (tmdbId, genreIds) => {
-    const response = await api.put(`/admin/movies/${tmdbId}/genres`, { genreIds });
+    const response = await api.put(`/movies/admin/${tmdbId}/genres`, { genreIds });
     return response.data;
   },
 
   updateMovieCategories: async (tmdbId, categoryIds) => {
-    const response = await api.put(`/admin/movies/${tmdbId}/categories`, { categoryIds });
+    const response = await api.put(`/movies/admin/${tmdbId}/categories`, { categoryIds });
     return response.data;
   },
 
-  // API doc: POST /api/v1/admin/movies/upload-image
+  // PATCH /api/v1/movies/admin/{tmdbId}/premium?isPremium=true
+  setMoviePremium: async (tmdbId, isPremium) => {
+    const response = await api.patch(`/movies/admin/${tmdbId}/premium`, null, { params: { isPremium } });
+    return response.data;
+  },
+
+  // POST /api/v1/movies/admin/upload-image
   uploadImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post('/admin/movies/upload-image', formData, {
+    const response = await api.post('/movies/admin/upload-image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -119,65 +128,69 @@ const adminService = {
   },
 
   // === Payment Management ===
+  // Backend: PaymentController @RequestMapping("/api/v1/payments"), admin sub-paths under /admin
   getAllPayments: async (page = 0, size = 20, status, userId, planType) => {
     const params = { page, size };
     if (status) params.status = status;
     if (userId) params.userId = userId;
     if (planType) params.planType = planType;
     
-    const response = await api.get('/admin/payments', { params });
+    const response = await api.get('/payments/admin', { params });
     return response.data;
   },
   
   getPaymentDetail: async (paymentId) => {
-    const response = await api.get(`/admin/payments/${paymentId}`);
+    const response = await api.get(`/payments/admin/${paymentId}`);
     return response.data;
   },
   
-  // API doc: PUT /api/v1/admin/payments/{paymentId}/status
+  // PUT /api/v1/payments/admin/{paymentId}/status?status=...
+  // Backend uses @RequestParam String status, not @RequestBody
   updatePaymentStatus: async (paymentId, status) => {
-    const response = await api.put(`/admin/payments/${paymentId}/status`, { status });
+    const response = await api.put(`/payments/admin/${paymentId}/status`, null, { params: { status } });
     return response.data;
   },
 
   // === Genre & Category Management ===
+  // Backend: GenreController @RequestMapping("/api/v1/genres"), admin sub-paths under /admin
   getAllGenres: async () => {
-    const response = await api.get('/admin/genres');
+    const response = await api.get('/genres/admin');
     return response.data;
   },
 
   createGenre: async (genreId, name) => {
-    const response = await api.post('/admin/genres', { genreId, name });
+    const response = await api.post('/genres/admin', { genreId, name });
     return response.data;
   },
 
   updateGenre: async (genreId, newName) => {
-    const response = await api.put(`/admin/genres/${genreId}`, null, { params: { newName } });
+    const response = await api.put(`/genres/admin/${genreId}`, null, { params: { newName } });
     return response.data;
   },
 
   deleteGenre: async (genreId) => {
-    const response = await api.delete(`/admin/genres/${genreId}`);
+    const response = await api.delete(`/genres/admin/${genreId}`);
     return response.data;
   },
 
+  // Backend: CategoryController @RequestMapping("/api/v1/categories"), admin sub-paths under /admin
   getAllCategories: async () => {
-    const response = await api.get('/admin/categories');
+    const response = await api.get('/categories/admin');
     return response.data;
   },
 
   createCategory: async (categoryId, name) => {
-    const response = await api.post('/admin/categories', { categoryId, name });
+    const response = await api.post('/categories/admin', { categoryId, name });
     return response.data;
   },
 
   updateCategory: async (categoryId, newName) => {
-    const response = await api.put(`/admin/categories/${categoryId}`, null, { params: { newName } });
+    const response = await api.put(`/categories/admin/${categoryId}`, null, { params: { newName } });
     return response.data;
   },
 
   deleteCategory: async (categoryId) => {
-    const response = await api.delete(`/admin/categories/${categoryId}`);
+    const response = await api.delete(`/categories/admin/${categoryId}`);
     return response.data;
   }
 };
