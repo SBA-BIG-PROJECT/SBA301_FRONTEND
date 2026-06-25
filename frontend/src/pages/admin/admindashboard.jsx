@@ -123,6 +123,36 @@ const AdminDashboard = () => {
         return amount + ' VND';
     };
 
+    const handleExportReport = () => {
+        if (!stats) return;
+        
+        const headers = ['Metric', 'Value'];
+        const rows = [
+            ['Total Users', stats.totalUsers || 0],
+            ['Active Users', stats.activeUsers || 0],
+            ['Premium Users', stats.premiumUsers || 0],
+            ['New Users Today', stats.newUsersToday || 0],
+            ['Total Movies', stats.totalMovies || 0],
+            ['Total Revenue (VND)', stats.totalRevenue || 0],
+            ['Total Views', stats.totalViews || 0],
+            ['Total Reviews', stats.totalReviews || 0]
+        ];
+        
+        // Convert to CSV string
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+            + headers.join(",") + "\n"
+            + rows.map(e => e.join(",")).join("\n");
+            
+        // Trigger download
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `CineAdmin_Report_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="bg-[#0F172A] text-[#f8fafc] antialiased flex h-screen overflow-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
             <AdminTaskbar />
@@ -162,7 +192,11 @@ const AdminDashboard = () => {
                             <h1 className="text-[32px] leading-[40px] tracking-[-0.01em] md:text-[48px] md:leading-[1.1] md:tracking-[-0.02em] font-extrabold text-[#f8fafc]">Dashboard Overview</h1>
                             <p className="text-[16px] leading-[24px] text-[#94a3b8] mt-[4px]">Real-time metrics and system performance.</p>
                         </div>
-                        <button className="bg-[#E50914] hover:brightness-110 active:brightness-90 text-[#ffffff] text-[12px] leading-[16px] tracking-[0.05em] font-medium px-[16px] py-2 rounded-lg transition-all flex items-center gap-[4px] shadow-lg shadow-[#E50914]/20">
+                        <button 
+                            onClick={handleExportReport}
+                            disabled={!stats || loading}
+                            className={`text-[12px] leading-[16px] tracking-[0.05em] font-medium px-[16px] py-2 rounded-lg transition-all flex items-center gap-[4px] shadow-lg ${stats && !loading ? 'bg-[#E50914] hover:brightness-110 active:brightness-90 text-[#ffffff] shadow-[#E50914]/20' : 'bg-[#334155] text-[#94a3b8] cursor-not-allowed'}`}
+                        >
                             <span className="material-symbols-outlined text-[18px]">download</span>
                             Export Report
                         </button>

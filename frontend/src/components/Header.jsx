@@ -584,33 +584,29 @@ const Header = () => {
                   <div className="p-5 border-b border-gray-800">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="font-bold text-gray-200 text-lg">{profile?.fullName || 'User'}</span>
-                      <svg className="w-6 h-6 text-yellow-500 drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/>
-                      </svg>
+                      {profile?.isPremium && (
+                        <span className="bg-yellow-500/20 text-yellow-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Premium</span>
+                      )}
+                      {!profile?.isPremium && (
+                        <svg className="w-6 h-6 text-yellow-500 drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/>
+                        </svg>
+                      )}
                     </div>
-                    <p className="text-sm text-gray-400 mb-4">
-                      Upgrade your account to <strong className="text-white">RoX</strong> for a premium experience.
-                    </p>
-                    <Link 
-                      to="/payment" 
-                      onClick={() => setProfileMenuOpen(false)}
-                      className="block w-full bg-[#fbd065] hover:bg-[#facc15] text-black text-center py-2.5 rounded-md font-bold text-sm transition-colors"
-                    >
-                      Upgrade now <span className="ml-1">^</span>
-                    </Link>
-                  </div>
-
-                  <div className="px-5 py-4 flex items-center justify-between border-b border-gray-800">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                      <span className="text-gray-300 font-medium text-sm">Balance</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-yellow-500">0 <span className="w-5 h-5 inline-flex items-center justify-center bg-[#2a2d36] rounded-full text-[10px] ml-1">R</span></span>
-                      <button className="bg-white text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-gray-200 transition-colors">
-                        <span>+</span> Deposit
-                      </button>
-                    </div>
+                    {!profile?.isPremium && (
+                      <>
+                        <p className="text-sm text-gray-400 mb-4">
+                          Upgrade your account to <strong className="text-white">RoX</strong> for a premium experience.
+                        </p>
+                        <Link 
+                          to="/payment" 
+                          onClick={() => setProfileMenuOpen(false)}
+                          className="block w-full bg-[#fbd065] hover:bg-[#facc15] text-black text-center py-2.5 rounded-md font-bold text-sm transition-colors"
+                        >
+                          Upgrade now <span className="ml-1">^</span>
+                        </Link>
+                      </>
+                    )}
                   </div>
 
                   <div className="flex flex-col py-2">

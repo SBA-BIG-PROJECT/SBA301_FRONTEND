@@ -159,11 +159,6 @@ const Detail = () => {
             <img src={poster} alt={movie.title} />
           </div>
           <div className="detail__info">
-            <div className="detail__breadcrumbs">
-              <Link to="/">Home</Link>
-              <span>•</span>
-              <span>{movie.title}</span>
-            </div>
             <h2>
               {movie.title}
               {movie.requiresPremium && (
@@ -191,7 +186,7 @@ const Detail = () => {
               )}
             </h2>
             <div className="detail__meta">
-              <span>{movie.releaseYear || 'N/A'}</span>
+              <span>{movie.releaseYear || (movie.releaseDate ? movie.releaseDate.substring(0, 4) : 'N/A')}</span>
               {movie.rating && (
                 <>
                   <span>•</span>

@@ -105,12 +105,10 @@ const Home = () => {
   const [heroMovies, setHeroMovies] = useState([])
   const [activeHeroIndex, setActiveHeroIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [loadMoreLoading, setLoadMoreLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [loadMoreError, setLoadMoreError] = useState('')
-  const [hasMore, setHasMore] = useState(true)
+  const [currentPage, setCurrentPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
   const [heroLoaded, setHeroLoaded] = useState(false)
-  const currentPage = useRef(0)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -123,7 +121,7 @@ const Home = () => {
         if (!active) return
         const list = response.content || []
         setMovies(list)
-        setHasMore(!response.last)
+        setTotalPages(response.totalPages || 0)
         if (list.length > 0) setHeroMovies(list.slice(0, 5))
 
         const genresList = await movieService.getGenres()
@@ -163,27 +161,21 @@ const Home = () => {
     return () => clearInterval(timer);
   }, [heroMovies.length]);
 
-  const loadMore = async () => {
-    if (loadMoreLoading || !hasMore) return
-    const nextPage = currentPage.current + 1
-    setLoadMoreLoading(true)
-    setLoadMoreError('')
+  const handlePageChange = async (page) => {
+    if (page < 0 || page >= totalPages || page === currentPage) return;
+    setIsLoading(true);
+    setErrorMessage('');
     try {
-      const response = await movieService.getMovies({ page: nextPage, size: 20 })
-      const newMovies = response.content || []
-      if (newMovies.length === 0) {
-        setHasMore(false)
-        setLoadMoreError('All movies displayed.')
-      } else {
-        setMovies(prev => [...prev, ...newMovies])
-        setHasMore(!response.last)
-        currentPage.current = nextPage
-      }
+      const response = await movieService.getMovies({ page, size: 20 });
+      setMovies(response.content || []);
+      setCurrentPage(page);
+      setTotalPages(response.totalPages || 0);
+      document.getElementById('all-movies-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
-      console.error('[LoadMore]', err)
-      setLoadMoreError('Failed to load. Please try again.')
+      console.error('[PageChange]', err);
+      setErrorMessage('Failed to load page.');
     } finally {
-      setLoadMoreLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -315,7 +307,7 @@ const Home = () => {
       })}
 
       {/* ── MOVIE GRID ────────────────────────────────────────────────── */}
-      <section className="hm-section">
+      <section className="hm-section" id="all-movies-section">
         <div className="hm-section__header">
           <div className="hm-section__title-wrap">
             <div className="hm-section__accent" />
@@ -340,33 +332,53 @@ const Home = () => {
             {movies.map((movie) => (
               <MovieCard key={movie.id} movie={movie} onNavigate={navigate} />
             ))}
-            {loadMoreLoading &&
-              Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={`sk-${i}`} />)
-            }
           </div>
         )}
 
-        {loadMoreError && (
-          <p className="hm-load-msg">{loadMoreError}</p>
-        )}
-
-        {hasMore && !isLoading && (
-          <div className="hm-load-more">
+        {/* Pagination */}
+        {totalPages > 1 && !isLoading && (
+          <div className="flex justify-center items-center gap-2 mt-12">
             <button
-              className="hm-load-more__btn"
-              onClick={loadMore}
-              disabled={loadMoreLoading}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1E293B] text-white hover:bg-yellow-500 hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-bold"
             >
-              {loadMoreLoading ? (
-                <span className="hm-load-more__spinner" />
-              ) : (
-                <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                  Load more movies
-                </>
-              )}
+              &lt;
+            </button>
+            
+            {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = idx;
+              } else if (currentPage <= 2) {
+                pageNum = idx;
+              } else if (currentPage >= totalPages - 3) {
+                pageNum = totalPages - 5 + idx;
+              } else {
+                pageNum = currentPage - 2 + idx;
+              }
+
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                    pageNum === currentPage
+                      ? 'bg-yellow-500 text-black font-bold'
+                      : 'bg-[#1E293B] text-white hover:bg-yellow-500 hover:text-black font-medium'
+                  }`}
+                >
+                  {pageNum + 1}
+                </button>
+              );
+            })}
+            
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages - 1}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1E293B] text-white hover:bg-yellow-500 hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+            >
+              &gt;
             </button>
           </div>
         )}

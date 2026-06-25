@@ -27,8 +27,7 @@ const AdminTaskbar = () => {
     { name: 'Movies', icon: 'movie', path: '/admin/movies' },
     { name: 'Payments', icon: 'payments', path: '/admin/payments' },
     { name: 'Analytics', icon: 'analytics', path: '/admin/analytics' },
-    { name: 'Genres', icon: 'category', path: '/admin/genres' },
-    { name: 'Categories', icon: 'list', path: '/admin/categories' },
+    { name: 'Genres & Categories', icon: 'category', path: '/admin/genres' },
   ];
 
   return (

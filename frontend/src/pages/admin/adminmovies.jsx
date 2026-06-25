@@ -593,39 +593,14 @@ const AdminMovies = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Release Date</label>
-                  <input 
-                    type="datetime-local" 
-                    value={movieForm.releaseDate} 
-                    onChange={(e) => setMovieForm(prev => ({ ...prev, releaseDate: e.target.value }))}
-                    className="bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Vote Average (Rating)</label>
-                  <input 
-                    type="number" 
-                    step="0.1" 
-                    min="0" 
-                    max="10"
-                    value={movieForm.voteAverage} 
-                    onChange={(e) => setMovieForm(prev => ({ ...prev, voteAverage: e.target.value }))}
-                    className="bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm"
-                    placeholder="e.g. 8.5"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Vote Count</label>
-                  <input 
-                    type="number" 
-                    value={movieForm.voteCount} 
-                    onChange={(e) => setMovieForm(prev => ({ ...prev, voteCount: e.target.value }))}
-                    className="bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm"
-                    placeholder="e.g. 12000"
-                  />
-                </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Release Date</label>
+                <input 
+                  type="datetime-local" 
+                  value={movieForm.releaseDate} 
+                  onChange={(e) => setMovieForm(prev => ({ ...prev, releaseDate: e.target.value }))}
+                  className="bg-[#0F172A] border border-[#334155] rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#E50914] transition-colors text-sm"
+                />
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -696,10 +671,10 @@ const AdminMovies = () => {
               </div>
 
               {/* Taxonomies Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-1 gap-4 pt-2">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Genres</label>
-                  <div className="bg-[#0F172A] border border-[#334155] rounded-lg p-3 max-h-[150px] overflow-y-auto grid grid-cols-2 gap-2">
+                  <div className="bg-[#0F172A] border border-[#334155] rounded-lg p-3 max-h-[150px] overflow-y-auto grid grid-cols-2 md:grid-cols-4 gap-2">
                     {allGenres.map(g => (
                       <label key={g.id} className="flex items-center gap-2 text-xs text-[#f8fafc] cursor-pointer hover:text-white">
                         <input 
@@ -711,26 +686,6 @@ const AdminMovies = () => {
                         <span className="truncate">{translateGenre(g.name)}</span>
                       </label>
                     ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">Categories</label>
-                  <div className="bg-[#0F172A] border border-[#334155] rounded-lg p-3 max-h-[150px] overflow-y-auto space-y-2">
-                    {allCategories.map(cat => {
-                      const catId = cat.categoryId || cat.category_id;
-                      return (
-                        <label key={catId} className="flex items-center gap-2 text-xs text-[#f8fafc] cursor-pointer hover:text-white">
-                          <input 
-                            type="checkbox" 
-                            checked={movieForm.categoryIds.includes(catId)}
-                            onChange={() => handleCategoryCheckboxChange(catId)}
-                            className="accent-[#E50914]"
-                          />
-                          <span className="capitalize">{cat.name}</span>
-                        </label>
-                      );
-                    })}
                   </div>
                 </div>
               </div>
