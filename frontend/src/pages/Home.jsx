@@ -127,11 +127,10 @@ const Home = () => {
         if (list.length > 0) setHeroMovies(list.slice(0, 5))
 
         const genresList = await movieService.getGenres()
-        const translatedGenres = genresList.map(g => ({
+        const topGenres = genresList.slice(0, 5).map(g => ({
           ...g,
           name: translateGenre(g.name?.replace(/^phim\s+/i, '').trim())
         }))
-        const topGenres = translatedGenres.slice(0, 5)
         if (active) setGenres(topGenres)
 
         const gMovies = {}
