@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { authService } from '../../services';
 
 const AdminTaskbar = () => {
   const location = useLocation();
   const path = location.pathname;
+  const navigate = useNavigate();
 
   // Get collapse state from localStorage (to remember user choice across pages)
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -99,14 +101,22 @@ const AdminTaskbar = () => {
             {!isCollapsed && <span className="text-[14px] leading-[20px] font-medium whitespace-nowrap">Collapse</span>}
           </button>
           
-          <Link 
-            to="/logout"
+          <button 
+            onClick={() => {
+              const refreshToken = localStorage.getItem('refresh_token');
+              if (refreshToken) authService.logout(refreshToken);
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('refresh_token');
+              localStorage.removeItem('user');
+              navigate('/');
+              window.location.reload();
+            }}
             title={isCollapsed ? "Logout" : undefined}
             className={`flex items-center text-[#94A3B8] hover:bg-[#334155] hover:text-[#F8FAFC] rounded-lg transition-all cursor-pointer active:scale-95 ${isCollapsed ? 'justify-center p-[12px]' : 'gap-[16px] px-[16px] py-[12px]'}`}
           >
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>logout</span>
             {!isCollapsed && <span className="text-[14px] leading-[20px] font-medium whitespace-nowrap">Logout</span>}
-          </Link>
+          </button>
         </div>
       </aside>
     </>
