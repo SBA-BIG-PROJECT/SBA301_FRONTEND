@@ -111,36 +111,35 @@
   }
 
   .nav__menu-trigger {
-    @apply flex items-center gap-2 rounded-full border border-transparent px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-gray-100 transition;
+    @apply flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium tracking-wide text-gray-300 transition-colors cursor-pointer;
     background: transparent;
+    text-transform: none;
   }
 
   .nav__menu-trigger:hover,
   .nav__menu-trigger[aria-expanded='true'] {
-    @apply border-yellow-200/30 text-light-100;
-    box-shadow: 0 0 12px rgba(255, 214, 128, 0.25);
+    @apply text-white;
   }
 
   .nav__menu-caret {
     @apply h-3 w-3 text-light-200;
   }
 
-  /* Genres panel – new design */
   .nav__genres-panel {
-    @apply absolute left-0 top-full mt-3 rounded-2xl border border-white/10 backdrop-blur;
-    width: 680px;
+    @apply absolute left-0 top-full mt-2 rounded-xl border border-white/10 backdrop-blur-xl;
+    width: 600px;
     max-width: 90vw;
-    background: rgba(10, 8, 24, 0.97);
-    box-shadow: 0 32px 80px rgba(3, 0, 20, 0.7), 0 0 0 1px rgba(255,255,255,0.05);
+    background: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05);
     z-index: 60;
     overflow: hidden;
-    animation: zoomIn 0.18s ease-out both;
+    animation: zoomIn 0.15s ease-out both;
   }
 
   .genres-panel__head {
     @apply flex items-center justify-between px-5 py-4;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.05) 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: transparent;
   }
 
   .genres-panel__head-left {
@@ -148,8 +147,7 @@
   }
 
   .genres-panel__icon {
-    @apply flex h-9 w-9 items-center justify-center rounded-xl text-lg;
-    background: rgba(99,102,241,0.15);
+    @apply hidden;
   }
 
   .genres-panel__heading {
@@ -187,55 +185,20 @@
 
   /* Genre Pills */
   .genre-pill {
-    @apply flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all;
-    border: 1px solid transparent;
+    @apply flex items-center px-3 py-2 text-left text-sm font-medium text-gray-300 transition-colors rounded-lg cursor-pointer;
+    background: transparent !important;
+    border: none !important;
   }
 
   .genre-pill:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-  }
-
-  .genre-pill__icon {
-    font-size: 1.1rem;
-    line-height: 1;
-    flex-shrink: 0;
+    @apply !bg-white/10 !text-white;
+    transform: none !important;
+    box-shadow: none !important;
   }
 
   .genre-pill__name {
-    @apply truncate text-xs font-semibold;
+    @apply truncate;
   }
-
-  /* Color variants */
-  .genre-pill--blue   { background: rgba(59,130,246,0.12); color: #93c5fd; border-color: rgba(59,130,246,0.2); }
-  .genre-pill--blue:hover { background: rgba(59,130,246,0.22); border-color: rgba(59,130,246,0.4); }
-
-  .genre-pill--purple { background: rgba(168,85,247,0.12); color: #c4b5fd; border-color: rgba(168,85,247,0.2); }
-  .genre-pill--purple:hover { background: rgba(168,85,247,0.22); border-color: rgba(168,85,247,0.4); }
-
-  .genre-pill--pink   { background: rgba(236,72,153,0.12); color: #f9a8d4; border-color: rgba(236,72,153,0.2); }
-  .genre-pill--pink:hover { background: rgba(236,72,153,0.22); border-color: rgba(236,72,153,0.4); }
-
-  .genre-pill--green  { background: rgba(34,197,94,0.12); color: #86efac; border-color: rgba(34,197,94,0.2); }
-  .genre-pill--green:hover { background: rgba(34,197,94,0.22); border-color: rgba(34,197,94,0.4); }
-
-  .genre-pill--orange { background: rgba(249,115,22,0.12); color: #fdba74; border-color: rgba(249,115,22,0.2); }
-  .genre-pill--orange:hover { background: rgba(249,115,22,0.22); border-color: rgba(249,115,22,0.4); }
-
-  .genre-pill--teal   { background: rgba(20,184,166,0.12); color: #5eead4; border-color: rgba(20,184,166,0.2); }
-  .genre-pill--teal:hover { background: rgba(20,184,166,0.22); border-color: rgba(20,184,166,0.4); }
-
-  .genre-pill--red    { background: rgba(239,68,68,0.12); color: #fca5a5; border-color: rgba(239,68,68,0.2); }
-  .genre-pill--red:hover { background: rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.4); }
-
-  .genre-pill--indigo { background: rgba(99,102,241,0.12); color: #a5b4fc; border-color: rgba(99,102,241,0.2); }
-  .genre-pill--indigo:hover { background: rgba(99,102,241,0.22); border-color: rgba(99,102,241,0.4); }
-
-  .genre-pill--yellow { background: rgba(234,179,8,0.12); color: #fde047; border-color: rgba(234,179,8,0.2); }
-  .genre-pill--yellow:hover { background: rgba(234,179,8,0.22); border-color: rgba(234,179,8,0.4); }
-
-  .genre-pill--cyan   { background: rgba(6,182,212,0.12); color: #67e8f9; border-color: rgba(6,182,212,0.2); }
-  .genre-pill--cyan:hover { background: rgba(6,182,212,0.22); border-color: rgba(6,182,212,0.4); }
 
   .nav__menu-item:hover {
     @apply border-yellow-200/30 text-light-100;

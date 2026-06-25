@@ -19,10 +19,10 @@ const Header = () => {
     { id: 'categories', label: 'Categories' }
   ]
   const categoriesList = [
-    { id: 'trending', name: 'Trending 🔥' },
-    { id: 'top-rated', name: 'Top Rated 🌟' },
-    { id: 'now-playing', name: 'Now Playing 🎬' },
-    { id: 'upcoming', name: 'Upcoming 🚀' }
+    { id: 'trending', name: 'Trending' },
+    { id: 'top-rated', name: 'Top Rated' },
+    { id: 'now-playing', name: 'Now Playing' },
+    { id: 'upcoming', name: 'Upcoming' }
   ]
   const [genres, setGenres] = useState([])
   const [genresError, setGenresError] = useState('')
@@ -324,7 +324,6 @@ const Header = () => {
                         {/* Panel header */}
                         <div className="genres-panel__head">
                           <div className="genres-panel__head-left">
-                            <span className="genres-panel__icon">🎬</span>
                             <div>
                               <p className="genres-panel__heading">Movie Genres</p>
                               <p className="genres-panel__sub">
@@ -415,7 +414,6 @@ const Header = () => {
                         {/* Panel header */}
                         <div className="genres-panel__head">
                           <div className="genres-panel__head-left">
-                            <span className="genres-panel__icon">🔥</span>
                             <div>
                               <p className="genres-panel__heading">Movie Categories</p>
                               <p className="genres-panel__sub">

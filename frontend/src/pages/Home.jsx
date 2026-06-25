@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { movieService } from '../services'
+import { translateGenre } from '../utils/genreTranslator.js'
 import noPoster from '../assets/No-Poster.svg'
 import heroImg from '../assets/hero-img.png'
 
@@ -126,7 +127,11 @@ const Home = () => {
         if (list.length > 0) setHeroMovies(list.slice(0, 5))
 
         const genresList = await movieService.getGenres()
-        const topGenres = genresList.slice(0, 5)
+        const translatedGenres = genresList.map(g => ({
+          ...g,
+          name: translateGenre(g.name?.replace(/^phim\s+/i, '').trim())
+        }))
+        const topGenres = translatedGenres.slice(0, 5)
         if (active) setGenres(topGenres)
 
         const gMovies = {}

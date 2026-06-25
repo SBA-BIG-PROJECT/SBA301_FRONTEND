@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import logo from '../assets/logo.svg'
+import { authService } from '../services'
 
 const Footer = () => {
+  const isLoggedIn = authService.isAuthenticated()
   return (
     <footer className="footer">
       <div className="footer__brand">
@@ -29,23 +31,30 @@ const Footer = () => {
         </div>
         <div className="footer__col">
           <p className="footer__title">Account</p>
-          <Link className="footer__link" to="/login">
-            Sign in
-          </Link>
-          <Link className="footer__link" to="/register">
-            Register
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link className="footer__link" to="/watchlist">
+                Watchlist
+              </Link>
+              <Link className="footer__link" to="/history">
+                Watch History
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="footer__link" to="/login">
+                Sign in
+              </Link>
+              <Link className="footer__link" to="/register">
+                Register
+              </Link>
+            </>
+          )}
         </div>
         <div className="footer__col">
           <p className="footer__title">Support</p>
-          <a className="footer__link" href="#">
-            Help Center
-          </a>
-          <a className="footer__link" href="#">
-            Contact
-          </a>
-          <a className="footer__link" href="#">
-            Feedback
+          <a className="footer__link" href="mailto:support@sbamovies.com">
+            support@sbamovies.com
           </a>
         </div>
       </div>
