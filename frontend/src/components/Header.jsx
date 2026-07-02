@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom'
 import { useDebounce } from 'react-use'
 import Search from './Search.jsx'
+import AIChatbot from './AIChatbot.jsx'
 import logo from '../assets/logo.svg'
 import { movieService, authService, userService, genreService } from '../services'
 import { translateGenre } from '../utils/genreTranslator.js'
@@ -34,6 +35,7 @@ const Header = () => {
   
   const { notifications, unreadCount, markAllAsRead, markAsRead, refresh } = useNotifications()
   const [profileOpen, setProfileOpen] = useState(false)
+  const [aiChatOpen, setAiChatOpen] = useState(false)
   const isLoggedIn = authService.isAuthenticated()
   const [profile, setProfile] = useState(null)
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
@@ -501,6 +503,20 @@ const Header = () => {
         </div>
 
         <div className="nav__right">
+          {/* Chat with AI Button */}
+          <button
+            className="ai-chat-trigger"
+            type="button"
+            onClick={() => setAiChatOpen((v) => !v)}
+            aria-label="Chat with AI"
+          >
+            <svg className="ai-chat-trigger__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              <path d="M18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+            </svg>
+            <span className="ai-chat-trigger__text hidden sm:inline">Chat with AI</span>
+          </button>
+
           <div className="nav__action-island hidden sm:flex">
             {/* Notifications Dropdown */}
             <div className="relative flex">
@@ -782,6 +798,9 @@ const Header = () => {
     {profileOpen && (
       <UserProfile onClose={() => setProfileOpen(false)} />
     )}
+
+    {/* AI Chatbot */}
+    <AIChatbot isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
   </>
   )
 }
