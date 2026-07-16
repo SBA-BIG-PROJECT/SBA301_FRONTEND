@@ -11,7 +11,7 @@ const Watch = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [movie, setMovie] = useState(null)
-  const [trailerKey, setTrailerKey] = useState('')
+  const [embedUrl, setEmbedUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   
@@ -59,9 +59,19 @@ const Watch = () => {
         setReviews(reviewsData.content || [])
         setRelatedMovies(relatedData.content || relatedData || [])
         
-        // Get trailerKey from backend trailerUrl
-        if (movieData?.trailerUrl) {
-          setTrailerKey(extractVideoID(movieData.trailerUrl))
+        // Try resolving the playToken if available
+        if (movieData?.playToken) {
+          try {
+            const resolvedUrl = await movieService.resolvePlayToken(movieData.playToken)
+            setEmbedUrl(resolvedUrl)
+          } catch (tokenError) {
+            console.error('Failed to resolve play token:', tokenError)
+            if (movieData?.trailerUrl) {
+              setEmbedUrl(movieData.trailerUrl.includes('http') ? movieData.trailerUrl : `https://www.youtube.com/embed/${extractVideoID(movieData.trailerUrl)}`)
+            }
+          }
+        } else if (movieData?.trailerUrl) {
+          setEmbedUrl(movieData.trailerUrl.includes('http') ? movieData.trailerUrl : `https://www.youtube.com/embed/${extractVideoID(movieData.trailerUrl)}`)
         }
         
         // Add to history when loaded
@@ -82,10 +92,27 @@ const Watch = () => {
 
     loadWatch()
 
-    return () => {
-      active = false
-    }
   }, [id])
+
+  useEffect(() => {
+    const handleContextMenu = (e) => e.preventDefault();
+    const handleKeyDown = (e) => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c' || e.key === 'J' || e.key === 'j')) ||
+        (e.ctrlKey && (e.key === 'U' || e.key === 'u'))
+      ) {
+        e.preventDefault();
+        showToast('Developer tools are disabled on this page.', 'warning');
+      }
+    };
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showToast]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault()
@@ -110,10 +137,7 @@ const Watch = () => {
     }
   }
 
-  // Keep embed link or wrap it
-  const embedUrl = trailerKey
-    ? (trailerKey.includes('http') ? trailerKey : `https://www.youtube.com/embed/${trailerKey}`)
-    : ''
+
 
   return (
     <section className="watch">
@@ -162,14 +186,15 @@ const Watch = () => {
             This movie will be available on {new Date(movie.releaseDate).toLocaleString('en-US')}
           </p>
         </div>
-      ) : trailerKey ? (
+      ) : embedUrl ? (
         <div className="watch__player">
           <iframe
             className="watch__frame"
-            src={embedUrl}
+            src={embedUrl ? `${embedUrl}&origin=${window.location.origin}` : ''}
             title={movie?.title || 'Movie'}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
+            sandbox="allow-scripts allow-same-origin allow-presentation"
           />
         </div>
       ) : (

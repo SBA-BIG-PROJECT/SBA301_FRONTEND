@@ -21,6 +21,7 @@ const Detail = () => {
   const [checkingWatchlist, setCheckingWatchlist] = useState(true)
   const [inWatchlist, setInWatchlist] = useState(false)
   const [showTrailer, setShowTrailer] = useState(false)
+  const [trailerEmbedUrl, setTrailerEmbedUrl] = useState('')
   const [relatedMovies, setRelatedMovies] = useState([])
   const [reviews, setReviews] = useState([])
   const navigate = useNavigate()
@@ -92,12 +93,48 @@ const Detail = () => {
 
     loadDetails()
 
-    return () => {
-      active = false
-    }
   }, [id, isInWatchlist])
 
+  useEffect(() => {
+    const handleContextMenu = (e) => e.preventDefault();
+    const handleKeyDown = (e) => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c' || e.key === 'J' || e.key === 'j')) ||
+        (e.ctrlKey && (e.key === 'U' || e.key === 'u'))
+      ) {
+        e.preventDefault();
+        showToast('Developer tools are disabled on this page.', 'warning');
+      }
+    };
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showToast]);
 
+  const handleWatchTrailer = async () => {
+    if (trailerEmbedUrl) {
+      setShowTrailer(true)
+      return
+    }
+    
+    if (!movie?.playToken) {
+      showToast('Trailer not available or premium content.', 'error')
+      return
+    }
+    
+    try {
+      const url = await movieService.resolvePlayToken(movie.playToken)
+      setTrailerEmbedUrl(url)
+      setShowTrailer(true)
+    } catch (e) {
+      console.error('Failed to resolve trailer URL', e)
+      showToast('Failed to load trailer. Please try again.', 'error')
+    }
+  }
 
   const handleWatchlistToggle = async () => {
     try {
@@ -248,7 +285,7 @@ const Detail = () => {
               <button
                 className="btn btn--secondary flex items-center gap-2 bg-gray-600 hover:bg-gray-700 bg-opacity-70"
                 type="button"
-                onClick={() => setShowTrailer(true)}
+                onClick={handleWatchTrailer}
               >
                 Watch Trailer
               </button>
@@ -275,7 +312,7 @@ const Detail = () => {
         </div>
       </div>
 
-      {showTrailer && movie?.trailerUrl && (
+      {showTrailer && trailerEmbedUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
           <div className="relative w-full max-w-5xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
             <button 
@@ -286,10 +323,11 @@ const Detail = () => {
             </button>
             <iframe
               className="w-full h-full"
-              src={extractVideoID(movie.trailerUrl).includes('http') ? extractVideoID(movie.trailerUrl) : `https://www.youtube.com/embed/${extractVideoID(movie.trailerUrl)}?autoplay=1`}
+              src={trailerEmbedUrl ? `${trailerEmbedUrl}${trailerEmbedUrl.includes('?') ? '&' : '?'}origin=${window.location.origin}` : ''}
               title="Trailer"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              sandbox="allow-scripts allow-same-origin allow-presentation"
             ></iframe>
           </div>
         </div>
