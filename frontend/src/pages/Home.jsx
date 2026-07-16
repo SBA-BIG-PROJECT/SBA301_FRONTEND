@@ -19,7 +19,7 @@ const getBackdrop = (path) =>
     ? path.startsWith('http') ? path : `${IMG_W1280}${path.startsWith('/') ? '' : '/'}${path}`
     : heroImg
 
-const getRating = (r) => (r != null && !isNaN(Number(r)) ? Number(r).toFixed(1) : null)
+const getRating = (r) => (r != null && !isNaN(Number(r)) ? (Number(r) / 2).toFixed(1) : null)
 const getYear = (y) => y ? String(y).split('-')[0] : null
 
 // ── Skeleton card ──────────────────────────────────────────────────────────
@@ -88,7 +88,7 @@ const MovieCard = ({ movie, onNavigate }) => {
     <>
       <div
         ref={cardRef}
-        className="hm-card transition-opacity duration-300"
+        className="hm-card transition-opacity duration-300 w-full"
         style={{ opacity: isHovered ? 0 : 1 }}
         onClick={() => onNavigate(`/movie/${movie.id}`)}
         onMouseEnter={handleMouseEnter}
@@ -449,7 +449,7 @@ const Home = () => {
             
             <div className="flex gap-4 overflow-x-auto pb-6 hide-scrollbar snap-x w-full" style={{ scrollBehavior: 'smooth' }}>
               {rowMovies.map((movie) => (
-                <div key={movie.id} className="snap-start shrink-0 w-[180px] sm:w-[220px]">
+                <div key={movie.id} className="snap-start shrink-0 w-[180px] sm:w-[220px] flex">
                   <MovieCard movie={movie} onNavigate={navigate} />
                 </div>
               ))}

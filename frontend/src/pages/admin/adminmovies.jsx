@@ -453,7 +453,7 @@ const AdminMovies = () => {
                             <td className="px-[16px] py-[16px]">
                               <div className="flex items-center gap-[4px] text-[#f8fafc]">
                                 <span className="material-symbols-outlined text-[#E50914] text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="font-medium">{movie.voteAverage || movie.averageRating || '--'}</span>
+                                <span className="font-medium">{movie.voteAverage ? (movie.voteAverage / 2).toFixed(1) : movie.averageRating ? (movie.averageRating / 2).toFixed(1) : '--'}</span>
                               </div>
                             </td>
                             <td className="px-[16px] py-[16px] text-[#94A3B8]">{movie.totalViews || 0}</td>

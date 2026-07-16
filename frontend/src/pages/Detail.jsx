@@ -190,7 +190,7 @@ const Detail = () => {
               {movie.rating && (
                 <>
                   <span>•</span>
-                  <span>★ {movie.rating.toFixed(1)}</span>
+                  <span>★ {(movie.rating / 2).toFixed(1)}</span>
                 </>
               )}
               {movie.runtime && (
@@ -372,7 +372,7 @@ const Detail = () => {
                   <div className="review-card__meta">
                     <h4>{review.userName || 'Anonymous'}</h4>
                     <div className="review-card__rating">
-                      ★ {review.rating} / 10
+                      ★ {(review.rating / 2).toFixed(1)} / 5
                     </div>
                   </div>
                 </div>

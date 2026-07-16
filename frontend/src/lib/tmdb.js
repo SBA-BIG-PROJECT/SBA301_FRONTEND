@@ -105,7 +105,7 @@ const formatRating = (value) => {
     return 'N/A'
   }
 
-  return value.toFixed(1)
+  return (value / 2).toFixed(1)
 }
 
 export {

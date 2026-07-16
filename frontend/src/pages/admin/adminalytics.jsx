@@ -186,7 +186,7 @@ const AdminAnalytics = () => {
                                 <div className="text-[13px] font-medium text-[#f8fafc] truncate">{m.title}</div>
                                 <div className="flex items-center gap-[4px]">
                                   <span className="material-symbols-outlined text-yellow-400 text-[12px]">star</span>
-                                  <span className="text-[11px] text-[#94A3B8]">{m.rating?.toFixed(1) || 'N/A'} · {formatNumber(m.count)} reviews</span>
+                                  <span className="text-[11px] text-[#94A3B8]">{(m.rating / 2)?.toFixed(1) || 'N/A'} · {formatNumber(m.count)} reviews</span>
                                 </div>
                               </div>
                             </div>

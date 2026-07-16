@@ -59,7 +59,7 @@ const MovieCard = ({ movie }) => {
         <div className="content">
           <div className="rating">
             <img src={ratingIcon} alt="Star Icon" />
-            <p>{rating != null && !isNaN(rating) ? rating.toFixed(1) : 'N/A'}</p>
+            <p>{rating != null && !isNaN(rating) ? (rating / 2).toFixed(1) : 'N/A'}</p>
           </div>
 
           {language_val && (

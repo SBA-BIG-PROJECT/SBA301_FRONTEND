@@ -300,7 +300,7 @@ const AdminMovieDetail = () => {
                   <span className="text-[12px] text-[#94A3B8] mb-[8px] flex items-center gap-[4px] font-medium tracking-wide">
                     <span className="material-symbols-outlined text-[16px]">star</span> Average Rating
                   </span>
-                  <span className="text-[32px] font-bold tracking-[-0.01em] text-[#f8fafc] leading-[40px]">{movie.voteAverage || movie.averageRating || '--'}</span>
+                  <span className="text-[32px] font-bold tracking-[-0.01em] text-[#f8fafc] leading-[40px]">{movie.voteAverage ? (movie.voteAverage / 2).toFixed(1) : movie.averageRating ? (movie.averageRating / 2).toFixed(1) : '--'}</span>
                   <span className="text-[10px] font-medium tracking-wide text-[#94A3B8] mt-1">From {movie.totalReviews || movie.voteCount || 0} reviews</span>
                 </div>
                 <div className="bg-[#1E293B]/80 backdrop-blur-md border border-[#334155] rounded-lg p-[16px] flex flex-col hover:bg-[#1E293B] hover:border-[#475569] transition-all">

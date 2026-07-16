@@ -394,7 +394,7 @@ const AdminUserDetail = () => {
                                                     <tr key={review.id} className="border-b border-[#334155] hover:bg-[#334155]/50 transition-colors">
                                                         <td className="p-[16px] text-[#94A3B8]">{new Date(review.createdAt).toLocaleDateString()}</td>
                                                         <td className="p-[16px] text-[#f8fafc] font-medium">{review.movieTitle}</td>
-                                                        <td className="p-[16px] text-[#7bd0ff] font-semibold">{review.rating} / 5.0</td>
+                                                        <td className="p-[16px] text-[#7bd0ff] font-semibold">{review.rating ? (review.rating / 2).toFixed(1) : '--'} / 5.0</td>
                                                         <td className="p-[16px] text-[#94A3B8]">{review.comment}</td>
                                                     </tr>
                                                 ))

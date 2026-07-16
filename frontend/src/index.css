@@ -1420,7 +1420,7 @@
 
 /* Movie Card */
 .hm-card {
-  @apply flex flex-col cursor-pointer rounded-xl overflow-hidden;
+  @apply flex flex-col cursor-pointer rounded-xl overflow-hidden h-full;
   background: #141220;
   border: 1px solid rgba(255,255,255,0.06);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s;
@@ -1503,7 +1503,7 @@
 }
 
 .hm-card__body {
-  @apply flex flex-col gap-1 p-3;
+  @apply flex flex-col gap-1 p-3 flex-1;
 }
 
 .hm-card__title {
@@ -1513,11 +1513,13 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin: 0;
+  min-height: 38px;
 }
 
 .hm-card__meta {
   @apply text-xs text-gray-500;
   margin: 0;
+  margin-top: auto;
 }
 
 /* Skeleton */

@@ -326,7 +326,7 @@ const UserProfile = ({ onClose }) => {
             <StatCard icon="🎬" label="Watched" value={stats.totalViewedMovies} />
             <StatCard icon="📝" label="Reviews" value={stats.totalReviews} />
             <StatCard icon="🔖" label="Watchlist" value={stats.totalWatchlistItems} />
-            <StatCard icon="⭐" label="Avg Rating" value={stats.averageRating ? Number(stats.averageRating).toFixed(1) : '—'} />
+            <StatCard icon="⭐" label="Avg Rating" value={stats.averageRating ? (Number(stats.averageRating) / 2).toFixed(1) : '—'} />
           </div>
         )}
 
