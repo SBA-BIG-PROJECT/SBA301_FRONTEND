@@ -15,6 +15,11 @@ const AdminPayment = () => {
 
   // Filters
   const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useState('');
+
+  // Detail Modal
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const getPageNumbers = () => {
     const pageNumbers = [];
@@ -60,7 +65,8 @@ const AdminPayment = () => {
       setLoading(true);
       setError(null);
       const statusParam = statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined;
-      const data = await adminService.getAllPayments(page, size, statusParam);
+      const searchParam = search ? search : undefined;
+      const data = await adminService.getAllPayments(page, size, statusParam, undefined, undefined, searchParam);
       setPayments(data?.content || []);
       setTotalPages(data?.totalPages || 0);
       setTotalElements(data?.totalElements || 0);
@@ -96,6 +102,19 @@ const AdminPayment = () => {
   const handleApplyFilters = () => {
     setPage(0);
     fetchPayments();
+  };
+
+  const handleOpenDetail = async (payment) => {
+    setSelectedPayment(payment);
+    setDetailLoading(true);
+    try {
+      const detail = await adminService.getPaymentDetail(payment.paymentId);
+      setSelectedPayment(detail);
+    } catch (err) {
+      console.error('Error fetching payment detail:', err);
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -201,7 +220,14 @@ const AdminPayment = () => {
               <div className="p-[24px] border-b border-[#334155] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-[16px]">
                 <div className="relative w-full sm:w-96">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]">search</span>
-                  <input className="w-full bg-[#0F172A] border border-[#334155] text-[#f8fafc] rounded-lg pl-10 pr-4 py-2 text-[14px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none" placeholder="Search by Order Code..." type="text"/>
+                  <input 
+                    className="w-full bg-[#0F172A] border border-[#334155] text-[#f8fafc] rounded-lg pl-10 pr-4 py-2 text-[14px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none" 
+                    placeholder="Search by Order Code, Email..." 
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
+                  />
                 </div>
                 <div className="flex items-center gap-[16px] w-full sm:w-auto">
                   <div className="relative flex-1 sm:flex-none">
@@ -278,7 +304,10 @@ const AdminPayment = () => {
                             {payment.createdAt ? new Date(payment.createdAt).toLocaleString() : 'N/A'}
                           </td>
                           <td className="p-[16px] text-right">
-                            <button className="text-[#94A3B8] hover:text-[#f8fafc] transition-colors">
+                            <button 
+                              onClick={() => handleOpenDetail(payment)}
+                              className="text-[#94A3B8] hover:text-[#f8fafc] transition-colors"
+                            >
                               <span className="material-symbols-outlined">more_vert</span>
                             </button>
                           </td>
@@ -338,6 +367,119 @@ const AdminPayment = () => {
           )}
         </div>
       </main>
+
+      {/* Payment Detail Modal */}
+      {selectedPayment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity" 
+            onClick={() => setSelectedPayment(null)}
+          ></div>
+          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[#334155] bg-[#1E293B] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all z-10">
+            {/* Header */}
+            <div className="flex items-center justify-between p-[24px] border-b border-[#334155]">
+              <div className="flex items-center gap-[12px]">
+                <div className="w-10 h-10 rounded-full bg-[#E50914]/10 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[#E50914] text-[20px]">receipt_long</span>
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-bold text-[#f8fafc]">Payment Details</h3>
+                  <p className="text-[12px] text-[#94A3B8]">Order #{selectedPayment.orderCode}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedPayment(null)}
+                className="text-[#94A3B8] hover:text-[#f8fafc] transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-[24px]">
+              {detailLoading ? (
+                <div className="flex items-center justify-center py-[32px]">
+                  <span className="material-symbols-outlined animate-spin text-[#94A3B8]">progress_activity</span>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-[20px]">
+                  {/* Status & Amount */}
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-[13px] font-semibold ${getStatusColor(selectedPayment.status)}`}>
+                      {selectedPayment.status || 'Unknown'}
+                    </span>
+                    <span className="text-[20px] font-bold text-[#f8fafc]">{formatCurrency(selectedPayment.amount)}</span>
+                  </div>
+
+                  {/* Info Grid */}
+                  <div className="grid grid-cols-2 gap-[16px]">
+                    <div className="bg-[#0F172A] rounded-lg p-[12px] border border-[#334155]">
+                      <p className="text-[11px] font-medium text-[#94A3B8] uppercase mb-[4px]">Payment ID</p>
+                      <p className="text-[14px] text-[#f8fafc] font-mono">PAY-{selectedPayment.paymentId}</p>
+                    </div>
+                    <div className="bg-[#0F172A] rounded-lg p-[12px] border border-[#334155]">
+                      <p className="text-[11px] font-medium text-[#94A3B8] uppercase mb-[4px]">Order Code</p>
+                      <p className="text-[14px] text-[#7bd0ff] font-mono">{selectedPayment.orderCode}</p>
+                    </div>
+                    <div className="bg-[#0F172A] rounded-lg p-[12px] border border-[#334155]">
+                      <p className="text-[11px] font-medium text-[#94A3B8] uppercase mb-[4px]">User</p>
+                      <p className="text-[14px] text-[#f8fafc]">{selectedPayment.userFullName || 'N/A'}</p>
+                      <p className="text-[12px] text-[#94A3B8]">{selectedPayment.userEmail}</p>
+                    </div>
+                    <div className="bg-[#0F172A] rounded-lg p-[12px] border border-[#334155]">
+                      <p className="text-[11px] font-medium text-[#94A3B8] uppercase mb-[4px]">Plan Type</p>
+                      <p className="text-[14px] text-[#f8fafc]">{selectedPayment.planType || 'N/A'}</p>
+                    </div>
+                    <div className="bg-[#0F172A] rounded-lg p-[12px] border border-[#334155]">
+                      <p className="text-[11px] font-medium text-[#94A3B8] uppercase mb-[4px]">Transaction ID</p>
+                      <p className="text-[14px] text-[#f8fafc] font-mono break-all">{selectedPayment.transactionId || 'N/A'}</p>
+                    </div>
+                    <div className="bg-[#0F172A] rounded-lg p-[12px] border border-[#334155]">
+                      <p className="text-[11px] font-medium text-[#94A3B8] uppercase mb-[4px]">Payment Link ID</p>
+                      <p className="text-[14px] text-[#f8fafc] font-mono break-all">{selectedPayment.paymentLinkId || 'N/A'}</p>
+                    </div>
+                  </div>
+
+                  {/* Timeline */}
+                  <div className="bg-[#0F172A] rounded-lg p-[16px] border border-[#334155]">
+                    <p className="text-[11px] font-medium text-[#94A3B8] uppercase mb-[12px]">Timeline</p>
+                    <div className="flex flex-col gap-[12px]">
+                      <div className="flex items-start gap-[12px]">
+                        <div className="w-2 h-2 rounded-full bg-[#94A3B8] mt-[6px] shrink-0"></div>
+                        <div>
+                          <p className="text-[13px] text-[#f8fafc]">Created</p>
+                          <p className="text-[12px] text-[#94A3B8]">{selectedPayment.createdAt ? new Date(selectedPayment.createdAt).toLocaleString() : 'N/A'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-[12px]">
+                        <div className={`w-2 h-2 rounded-full mt-[6px] shrink-0 ${selectedPayment.paidAt ? 'bg-green-500' : 'bg-[#334155]'}`}></div>
+                        <div>
+                          <p className="text-[13px] text-[#f8fafc]">Paid At</p>
+                          <p className="text-[12px] text-[#94A3B8]">{selectedPayment.paidAt ? new Date(selectedPayment.paidAt).toLocaleString() : 'Not paid yet'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-[12px]">
+                        <div className={`w-2 h-2 rounded-full mt-[6px] shrink-0 ${selectedPayment.startsAt ? 'bg-blue-500' : 'bg-[#334155]'}`}></div>
+                        <div>
+                          <p className="text-[13px] text-[#f8fafc]">Starts At</p>
+                          <p className="text-[12px] text-[#94A3B8]">{selectedPayment.startsAt ? new Date(selectedPayment.startsAt).toLocaleString() : 'N/A'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-[12px]">
+                        <div className={`w-2 h-2 rounded-full mt-[6px] shrink-0 ${selectedPayment.expiresAt ? 'bg-amber-500' : 'bg-[#334155]'}`}></div>
+                        <div>
+                          <p className="text-[13px] text-[#f8fafc]">Expires At</p>
+                          <p className="text-[12px] text-[#94A3B8]">{selectedPayment.expiresAt ? new Date(selectedPayment.expiresAt).toLocaleString() : 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

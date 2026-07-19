@@ -220,7 +220,7 @@ const AdminMovies = () => {
         overview: movieForm.overview,
         posterPath: movieForm.posterPath,
         backdropPath: movieForm.backdropPath,
-        releaseDate: movieForm.releaseDate || null,
+        releaseDate: movieForm.releaseDate ? new Date(movieForm.releaseDate).toISOString() : null,
         voteAverage: movieForm.voteAverage ? parseFloat(movieForm.voteAverage) : null,
         voteCount: movieForm.voteCount ? parseInt(movieForm.voteCount) : null,
         trailerUrl: movieForm.trailerUrl,
@@ -372,14 +372,17 @@ const AdminMovies = () => {
               </div>
               <div className="flex items-center gap-[8px] min-w-[200px]">
                 <span className="material-symbols-outlined text-[#94A3B8] text-[20px]">filter_list</span>
-                <select 
-                  value={isActive}
-                  onChange={(e) => setIsActive(e.target.value)}
-                  className="bg-[#0F172A] border border-[#334155] text-[14px] text-[#f8fafc] rounded-lg px-[16px] py-[8px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] w-full max-w-[150px] outline-none">
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <div className="relative w-full max-w-[150px]">
+                  <select 
+                    value={isActive}
+                    onChange={(e) => setIsActive(e.target.value)}
+                    className="bg-[#0F172A] border border-[#334155] text-[14px] text-[#f8fafc] rounded-lg pl-[16px] pr-[36px] py-[8px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] w-full outline-none appearance-none cursor-pointer">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">arrow_drop_down</span>
+                </div>
                 <button onClick={handleApplyFilters} className="bg-[#E50914] hover:brightness-110 active:brightness-90 text-white px-4 py-2 rounded-lg text-sm transition-all font-medium ml-2">Apply Filters</button>
               </div>
             </div>

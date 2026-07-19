@@ -145,11 +145,12 @@ const adminService = {
 
   // === Payment Management ===
   // Backend: PaymentController @RequestMapping("/api/v1/payments"), admin sub-paths under /admin
-  getAllPayments: async (page = 0, size = 20, status, userId, planType) => {
+  getAllPayments: async (page = 0, size = 20, status, userId, planType, search) => {
     const params = { page, size };
     if (status) params.status = status;
     if (userId) params.userId = userId;
     if (planType) params.planType = planType;
+    if (search) params.search = search;
     
     const response = await api.get('/payments/admin', { params });
     return response.data;

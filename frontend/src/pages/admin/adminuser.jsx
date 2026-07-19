@@ -367,9 +367,6 @@ const AdminUser = () => {
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-[#0F172A] border-b border-[#334155]">
                                     <tr>
-                                        <th className="p-[16px] text-[12px] leading-[16px] tracking-[0.05em] font-medium text-[#e9bcb6] uppercase w-12 text-center">
-                                            <input className="rounded bg-[#0F172A] border-[#334155] text-[#e50914] focus:ring-[#e50914] focus:ring-offset-[#1E293B]" type="checkbox" />
-                                        </th>
                                         <th className="p-[16px] text-[12px] leading-[16px] tracking-[0.05em] font-medium text-[#e9bcb6] uppercase">User</th>
                                         <th className="p-[16px] text-[12px] leading-[16px] tracking-[0.05em] font-medium text-[#e9bcb6] uppercase">User ID</th>
                                         <th className="p-[16px] text-[12px] leading-[16px] tracking-[0.05em] font-medium text-[#e9bcb6] uppercase">Role</th>
@@ -382,18 +379,15 @@ const AdminUser = () => {
                                 <tbody className="divide-y divide-[#334155]">
                                     {loading ? (
                                         <tr>
-                                            <td colSpan="8" className="p-[16px] text-center text-[#e9bcb6]">Loading users...</td>
+                                            <td colSpan="7" className="p-[16px] text-center text-[#e9bcb6]">Loading users...</td>
                                         </tr>
                                     ) : users.length === 0 ? (
                                         <tr>
-                                            <td colSpan="8" className="p-[16px] text-center text-[#e9bcb6]">No users found</td>
+                                            <td colSpan="7" className="p-[16px] text-center text-[#e9bcb6]">No users found</td>
                                         </tr>
                                     ) : (
                                         users.map((user) => (
                                             <tr key={user.id} className="hover:bg-[#0F172A]/50 transition-colors group">
-                                                <td className="p-[16px] text-center">
-                                                    <input className="rounded bg-[#0F172A] border-[#334155] text-[#e50914] focus:ring-[#e50914] focus:ring-offset-[#1E293B]" type="checkbox" />
-                                                </td>
                                                 <td className="p-[16px]">
                                                     <div className="flex items-center gap-[16px]">
                                                         {user.avatarUrl ? (
