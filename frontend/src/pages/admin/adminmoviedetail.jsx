@@ -184,7 +184,7 @@ const AdminMovieDetail = () => {
 
   if (loading) {
     return (
-      <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased">
         <ToastContainer toasts={toasts} onClose={closeToast} />
         <AdminTaskbar />
         <main className="flex-1 md:ml-64 min-h-screen flex items-center justify-center">
@@ -196,7 +196,7 @@ const AdminMovieDetail = () => {
 
   if (!movie) {
     return (
-      <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased">
         <AdminTaskbar />
         <main className="flex-1 md:ml-64 min-h-screen flex items-center justify-center flex-col gap-4">
           <div className="text-[#94A3B8]">Movie not found</div>
@@ -207,7 +207,7 @@ const AdminMovieDetail = () => {
   }
 
   return (
-    <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased">
       <ToastContainer toasts={toasts} onClose={closeToast} />
       {/* Sidebar */}
       <AdminTaskbar />
@@ -331,7 +331,7 @@ const AdminMovieDetail = () => {
                   </div>
                   <div className="flex flex-col overflow-hidden w-full">
                     <span className="text-[12px] font-medium tracking-wide text-[#f8fafc] truncate">Main Theatrical Trailer</span>
-                    <span className="text-[13px] text-[#94A3B8] truncate font-['Geist'] mt-1">{movie.trailerUrl || 'No trailer URL'}</span>
+                    <span className="text-[13px] text-[#94A3B8] truncate mt-1">{movie.trailerUrl || 'No trailer URL'}</span>
                   </div>
                 </div>
               </div>
@@ -405,7 +405,7 @@ const AdminMovieDetail = () => {
       {/* Edit Movie Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-[#1E293B] border border-[#334155] rounded-xl w-full max-w-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] my-8 overflow-hidden font-['Inter']">
+          <div className="bg-[#1E293B] border border-[#334155] rounded-xl w-full max-w-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] my-8 overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b border-[#334155]">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">

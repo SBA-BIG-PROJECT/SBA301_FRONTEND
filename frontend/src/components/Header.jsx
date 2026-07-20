@@ -615,7 +615,7 @@ const Header = () => {
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-[#1a1c22] rounded-xl border border-gray-800 shadow-2xl overflow-hidden z-50 flex flex-col font-['Inter']">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-[#1a1c22] rounded-xl border border-gray-800 shadow-2xl overflow-hidden z-50 flex flex-col">
                   <div className="p-5 border-b border-gray-800">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="font-bold text-gray-200 text-lg">{profile?.fullName || 'User'}</span>

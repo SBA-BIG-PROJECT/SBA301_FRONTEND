@@ -154,7 +154,7 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="bg-[#0F172A] text-[#f8fafc] antialiased flex h-screen overflow-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <div className="bg-[#0F172A] text-[#f8fafc] antialiased flex h-screen overflow-hidden">
             <AdminTaskbar />
 
             {/* Main Content Wrapper */}

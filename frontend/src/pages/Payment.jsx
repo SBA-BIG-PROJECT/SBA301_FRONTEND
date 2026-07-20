@@ -71,7 +71,7 @@ const Payment = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-white py-20 px-4 font-['Inter'] flex justify-center items-start">
+    <div className="min-h-screen bg-[#0F172A] text-white py-20 px-4 flex justify-center items-start">
       <div className="max-w-4xl w-full">
         
         {/* Header */}

@@ -1,4 +1,3 @@
-// Export all services
 export { default as authService } from './authService'
 export { default as movieService } from './movieService'
 export { default as watchlistService } from './watchlistService'
@@ -11,4 +10,4 @@ export { default as historyService } from './historyService'
 export { default as genreService } from './genreService'
 export { default as adminService } from './adminService'
 export { default as chatService } from './chatService'
-export { default as commentService } from './commentService'
+export { commentService, default as commentServiceDefault } from './commentService'

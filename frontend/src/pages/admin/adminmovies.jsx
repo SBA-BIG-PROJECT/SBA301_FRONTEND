@@ -300,7 +300,7 @@ const AdminMovies = () => {
   };
 
   return (
-    <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased">
       <ToastContainer toasts={toasts} onClose={closeToast} />
       {/* Sidebar */}
       <AdminTaskbar />
@@ -509,7 +509,7 @@ const AdminMovies = () => {
                     </tbody>
                   </table>
                 </div>
-                <div className="bg-[#0F172A] border-t border-[#334155] p-[16px] flex items-center justify-between text-xs text-[#94A3B8] font-['Inter']">
+                <div className="bg-[#0F172A] border-t border-[#334155] p-[16px] flex items-center justify-between text-xs text-[#94A3B8]">
                   <span>{movies.length > 0 ? `Showing ${(page * size) + 1} to ${(page * size) + movies.length} of ${totalElements} movies` : 'No results'}</span>
                   <div className="flex items-center gap-1.5">
                     <button 
@@ -565,7 +565,7 @@ const AdminMovies = () => {
       {/* Add / Edit Movie Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-[#1E293B] border border-[#334155] rounded-xl w-full max-w-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] my-8 overflow-hidden font-['Inter']">
+          <div className="bg-[#1E293B] border border-[#334155] rounded-xl w-full max-w-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] my-8 overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b border-[#334155]">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">

@@ -133,7 +133,7 @@ const AdminGenres = () => {
   };
 
   return (
-    <div className="bg-[#0F172A] text-[#f8fafc] font-['Inter'] min-h-screen flex antialiased">
+    <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased">
       <ToastContainer toasts={toasts} onClose={closeToast} />
       {/* SideNavBar */}
       <AdminTaskbar />

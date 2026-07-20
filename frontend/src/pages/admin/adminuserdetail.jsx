@@ -187,7 +187,7 @@ const AdminUserDetail = () => {
     if (!user) return <div className="text-white p-12">User not found</div>;
 
     return (
-        <div className="bg-[#0F172A] text-[#f8fafc] font-['Inter'] min-h-screen flex antialiased">
+        <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased">
             <ToastContainer toasts={toasts} onClose={closeToast} />
             {/* SideNavBar */}
             <AdminTaskbar />
@@ -583,7 +583,7 @@ const AdminUserDetail = () => {
                     <div className="bg-[#1E293B] border border-[#334155] rounded-xl w-full max-w-md shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
                         {/* Header */}
                         <div className="flex justify-between items-center px-6 py-4 border-b border-[#334155]">
-                            <h3 className="text-lg font-bold text-white flex items-center gap-2 font-['Inter']">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
                                 <span className="material-symbols-outlined text-[#E50914]">gavel</span>
                                 Ban User Account
                             </h3>
@@ -595,7 +595,7 @@ const AdminUserDetail = () => {
                             </button>
                         </div>
                         {/* Form */}
-                        <form onSubmit={handleConfirmBan} className="p-6 space-y-4 font-['Inter']">
+                        <form onSubmit={handleConfirmBan} className="p-6 space-y-4">
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">User ID</label>
                                 <input 
