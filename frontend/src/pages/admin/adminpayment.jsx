@@ -137,7 +137,7 @@ const AdminPayment = () => {
   };
 
   return (
-    <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased">
       {/* Sidebar */}
       <AdminTaskbar />
       
@@ -281,7 +281,7 @@ const AdminPayment = () => {
                     ) : (
                       payments.map((payment) => (
                         <tr key={payment.paymentId} className="hover:bg-[#334155]/50 transition-colors group cursor-pointer border-b border-[#334155]">
-                          <td className="p-[16px] font-['Geist'] text-[#7bd0ff] text-[12px]">{payment.orderCode || `#PAY-${payment.paymentId}`}</td>
+                          <td className="p-[16px] text-[#7bd0ff] text-[12px]">{payment.orderCode || `#PAY-${payment.paymentId}`}</td>
                           <td className="p-[16px]">
                             <div className="flex items-center gap-[8px]">
                               <div className="w-8 h-8 rounded-full bg-[#334155] flex items-center justify-center text-[12px] font-bold">
@@ -319,7 +319,7 @@ const AdminPayment = () => {
               </div>
 
               {/* Pagination */}
-              <div className="p-[16px] border-t border-[#334155] flex items-center justify-between text-[#94A3B8] text-xs font-['Inter']">
+              <div className="p-[16px] border-t border-[#334155] flex items-center justify-between text-[#94A3B8] text-xs">
                 <div>{payments.length > 0 ? `Showing ${(page * size) + 1} to ${(page * size) + payments.length} of ${totalElements} entries` : 'No results'}</div>
                 <div className="flex items-center gap-1.5">
                   <button 

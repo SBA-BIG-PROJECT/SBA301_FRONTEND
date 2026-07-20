@@ -348,7 +348,7 @@ const Home = () => {
         <div className="relative z-10 w-full max-w-[1800px] mx-auto px-5 xs:px-10 pb-16 flex flex-col gap-4">
           
           {/* Title */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-wide max-w-3xl leading-tight" style={{ textShadow: '2px 2px 10px rgba(0,0,0,0.8)', fontFamily: '"Bebas Neue", sans-serif' }}>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-wide max-w-3xl leading-tight" style={{ textShadow: '2px 2px 10px rgba(0,0,0,0.8)' }}>
             {heroTitle}
           </h1>
 

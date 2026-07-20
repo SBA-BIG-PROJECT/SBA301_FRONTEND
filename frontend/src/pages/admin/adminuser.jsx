@@ -267,7 +267,6 @@ const AdminUser = () => {
     return (
         <div
             className="bg-[#0F172A] text-[#ffdad5] text-[14px] leading-[20px] min-h-screen flex antialiased"
-            style={{ fontFamily: 'Inter, sans-serif' }}
         >
             <ToastContainer toasts={toasts} onClose={closeToast} />
             <AdminTaskbar />
@@ -403,11 +402,11 @@ const AdminUser = () => {
                                                         )}
                                                         <div>
                                                             <div className="text-[14px] leading-[20px] font-medium text-[#ffdad5]">{user.fullName || 'Unknown User'}</div>
-                                                            <div className="text-[13px] leading-[18px] font-normal font-['Geist'] text-[#e9bcb6] opacity-70">{user.email}</div>
+                                                            <div className="text-[13px] leading-[18px] font-normal text-[#e9bcb6] opacity-70">{user.email}</div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="p-[16px] text-[13px] leading-[18px] font-normal font-['Geist'] text-[#e9bcb6]">USR-{user.id}</td>
+                                                <td className="p-[16px] text-[13px] leading-[18px] font-normal text-[#e9bcb6]">USR-{user.id}</td>
                                                 <td className="p-[16px]">
                                                     {user.role === 'ADMIN' ? (
                                                         <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-[#e50914]/20 text-[#e50914] border border-[#e50914]/30">Admin</span>
@@ -545,7 +544,7 @@ const AdminUser = () => {
                     <div className="bg-[#1E293B] border border-[#334155] rounded-xl w-full max-w-lg shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
                         {/* Header */}
                         <div className="flex justify-between items-center px-6 py-4 border-b border-[#334155]">
-                            <h3 className="text-lg font-bold text-white flex items-center gap-2 font-['Inter']">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
                                 <span className="material-symbols-outlined text-[#E50914]">manage_accounts</span>
                                 Edit User Profile
                             </h3>
@@ -557,7 +556,7 @@ const AdminUser = () => {
                             </button>
                         </div>
                         {/* Form */}
-                        <form onSubmit={handleSaveUser} className="p-6 space-y-4 font-['Inter']">
+                        <form onSubmit={handleSaveUser} className="p-6 space-y-4">
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">User ID</label>
                                 <input 
@@ -642,7 +641,7 @@ const AdminUser = () => {
                     <div className="bg-[#1E293B] border border-[#334155] rounded-xl w-full max-w-md shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
                         {/* Header */}
                         <div className="flex justify-between items-center px-6 py-4 border-b border-[#334155]">
-                            <h3 className="text-lg font-bold text-white flex items-center gap-2 font-['Inter']">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
                                 <span className="material-symbols-outlined text-[#E50914]">gavel</span>
                                 Ban User Account
                             </h3>
@@ -654,7 +653,7 @@ const AdminUser = () => {
                             </button>
                         </div>
                         {/* Form */}
-                        <form onSubmit={handleConfirmBan} className="p-6 space-y-4 font-['Inter']">
+                        <form onSubmit={handleConfirmBan} className="p-6 space-y-4">
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-xs uppercase tracking-wider font-semibold text-[#94A3B8]">User ID</label>
                                 <input 

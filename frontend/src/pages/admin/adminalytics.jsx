@@ -48,7 +48,7 @@ const AdminAnalytics = () => {
   const TMDB_IMG = 'https://image.tmdb.org/t/p/w92';
 
   return (
-    <div className="bg-[#0F172A] text-[#f8fafc] font-['Inter'] min-h-screen flex antialiased">
+    <div className="bg-[#0F172A] text-[#f8fafc] min-h-screen flex antialiased">
       <AdminTaskbar />
 
       <main className="flex-1 md:ml-64 flex flex-col min-h-screen bg-[#0F172A]">

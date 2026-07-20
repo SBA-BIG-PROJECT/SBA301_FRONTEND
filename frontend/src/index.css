@@ -1,5 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100..900;1,100..900&display=swap&subset=vietnamese");
 
 @import "tailwindcss";
 
@@ -13,7 +12,7 @@
 
   --color-dark-100: #0f0d23;
 
-  --font-dm-sans: DM Sans, sans-serif;
+  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --breakpoint-xs: 480px;
 
@@ -21,10 +20,43 @@
 }
 
 @layer base {
+  html {
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    font-family: "DM Sans", serif;
+    font-family: var(--font-sans);
     font-optical-sizing: auto;
+    font-synthesis: none;
     background: #030014;
+  }
+
+  #root,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-size: inherit;
+  }
+
+  .ant-btn,
+  .ant-input,
+  .ant-select,
+  .ant-modal,
+  .ant-dropdown,
+  .ant-tooltip,
+  [class*="Mui"] {
+    font-family: inherit;
   }
 
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
@@ -415,7 +447,6 @@
 
   .hero__title {
     @apply text-left text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl;
-    font-family: "Bebas Neue", sans-serif;
   }
 
   .hero__subtitle {
@@ -879,7 +910,7 @@
 @utility fancy-text {
   -webkit-text-stroke: 5px rgba(206, 206, 251, 0.5);
   font-size: 190px;
-  font-family: "Bebas Neue", sans-serif;
+  font-family: var(--font-sans);
 }
 
 @utility hide-scrollbar {
@@ -1269,7 +1300,6 @@
 
 .hm-hero__title {
   @apply text-3xl font-bold leading-tight text-white;
-  font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(1.5rem, 3.5vw, 2.5rem);
   margin: 0;
   text-align: left;
@@ -1657,6 +1687,7 @@
 }
 
 .ai-chat-trigger__text {
+  font-family: var(--font-sans);
   letter-spacing: 0.02em;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -1681,7 +1712,13 @@
   max-width: calc(100vw - 32px);
   max-height: 620px;
   z-index: 200;
+  font-family: var(--font-sans);
   animation: ai-panel-slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ai-chat-panel,
+.ai-chat-panel * {
+  font-family: var(--font-sans);
 }
 
 @media (max-width: 480px) {
@@ -1762,9 +1799,9 @@
 
 .ai-chat-header__title {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: #fff;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.005em;
 }
 
 .ai-chat-header__actions {
@@ -1858,7 +1895,7 @@
 }
 
 .ai-msg__content {
-  max-width: 85%;
+  max-width: 82%;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1869,22 +1906,29 @@
 }
 
 .ai-msg__text {
-  padding: 10px 14px;
+  padding: 9px 13px;
   border-radius: 16px;
   font-size: 13px;
   line-height: 1.5;
+  letter-spacing: 0.003em;
+  font-weight: 500;
+  word-break: break-word;
   margin: 0;
 }
 
 .ai-msg--user .ai-msg__text {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  letter-spacing: 0.002em;
   border-bottom-right-radius: 4px;
 }
 
 .ai-msg--ai .ai-msg__text {
   background: rgba(255, 255, 255, 0.06);
-  color: #d1d5db;
+  color: #e5e7eb;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-bottom-left-radius: 4px;
 }
@@ -2058,6 +2102,36 @@
   font-style: italic;
 }
 
+.ai-movie-card__reason-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ai-movie-card__reason--expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+  overflow: visible;
+}
+
+.ai-movie-card__reason-toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #a78bfa;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.ai-movie-card__reason-toggle:hover {
+  color: #c4b5fd;
+  text-decoration: underline;
+}
+
 .ai-movie-card__watch {
   display: inline-flex;
   align-items: center;
@@ -2212,6 +2286,7 @@
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
   font-size: 13px;
+  font-family: inherit;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -2324,4 +2399,4 @@
   width: 10px;
   height: 10px;
 }
-
+

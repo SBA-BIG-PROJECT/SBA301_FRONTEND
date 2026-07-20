@@ -49,6 +49,8 @@ const PLACEHOLDER_EN = 'Ask me anything about movies...'
 const MOVIE_SUMMARY_VI = 'Mình đã tìm thấy một số phim phù hợp, bạn xem nhanh ở các thẻ bên dưới nhé.'
 const MOVIE_SUMMARY_EN = 'I found some suitable movies. Please check the cards below.'
 
+const normalizeDisplayText = (text = '') => String(text).normalize('NFC')
+
 const normalizeTitle = (text = '') =>
   text
     .toLowerCase()
@@ -103,7 +105,7 @@ const parseStructuredMoviesPayload = (rawPayload = '') => {
 }
 
 const cleanupMarkdownText = (text = '') =>
-  text
+  normalizeDisplayText(text)
     .replace(/!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/g, '')
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1')
     .replace(/\*\*/g, '')
@@ -114,6 +116,13 @@ const cleanupMarkdownText = (text = '') =>
 const buildCompactMessage = (text, hasMovies) => {
   const cleaned = cleanupMarkdownText(text)
   if (!hasMovies) return cleaned
+
+  // Collapse verbose recommendation payloads into a short intro message.
+  const hasVerboseMovieFields = /(?:thể loại|nội dung|điểm đánh giá|director|cast|genre|overview|rating|release date)\s*:/i.test(cleaned)
+  const hasInlineNumberedList = /\b1\..+\b2\./.test(cleaned)
+  if (hasVerboseMovieFields || hasInlineNumberedList) {
+    return isVietnamese() ? MOVIE_SUMMARY_VI : MOVIE_SUMMARY_EN
+  }
 
   const lines = cleaned
     .split('\n')
@@ -136,16 +145,18 @@ const buildCompactMessage = (text, hasMovies) => {
 const parseAiResponse = (text) => {
   if (!text) return { cleanText: '', movies: [] }
 
+  const normalizedRawText = normalizeDisplayText(text)
+
   // Try structured JSON format: [AI_MOVIES]...[/AI_MOVIES]
   // Also accepts missing closing tag by capturing until end of message.
   const structuredRegex = /\[AI_MOVIES\]\s*([\s\S]*?)(?:\s*\[\/AI_MOVIES\]|$)/
-  const structuredMatch = structuredRegex.exec(text)
+  const structuredMatch = structuredRegex.exec(normalizedRawText)
 
   if (structuredMatch) {
     try {
       const moviesJson = parseStructuredMoviesPayload(structuredMatch[1])
 
-      const cleanText = text
+      const cleanText = normalizedRawText
         .replace(/\[AI_MOVIES\][\s\S]*?(?:\[\/AI_MOVIES\]|$)/, '')
         .trim()
       const compactText = buildCompactMessage(cleanText, moviesJson.length > 0)
@@ -153,7 +164,7 @@ const parseAiResponse = (text) => {
         cleanText: compactText,
         movies: moviesJson.map((m) => ({
           id: m.id,
-          reason: m.reason || '',
+          reason: normalizeDisplayText(m.reason || ''),
         })),
       }
     } catch (e) {
@@ -165,10 +176,10 @@ const parseAiResponse = (text) => {
   const movieIdRegex = /\[MOVIE_ID:(\d+)\]/g
   const movies = []
   let match
-  while ((match = movieIdRegex.exec(text)) !== null) {
+  while ((match = movieIdRegex.exec(normalizedRawText)) !== null) {
     movies.push({ id: parseInt(match[1], 10), reason: '' })
   }
-  const cleanText = text.replace(/\s*\[MOVIE_ID:\d+\]/g, '').trim()
+  const cleanText = normalizedRawText.replace(/\s*\[MOVIE_ID:\d+\]/g, '').trim()
 
   // Fallback: numbered markdown list format.
   // Example:
@@ -180,7 +191,7 @@ const parseAiResponse = (text) => {
   const numberedTitles = []
   let titleMatch
   while ((titleMatch = numberedTitleRegex.exec(cleanText)) !== null) {
-    const title = titleMatch[1]?.trim()
+    const title = normalizeDisplayText(titleMatch[1]?.trim() || '')
     if (title) numberedTitles.push(title)
   }
 
@@ -188,7 +199,7 @@ const parseAiResponse = (text) => {
   let imageMatch
   while ((imageMatch = imageRegex.exec(cleanText)) !== null) {
     postersByAlt.push({
-      alt: imageMatch[1]?.trim() || '',
+      alt: normalizeDisplayText(imageMatch[1]?.trim() || ''),
       url: imageMatch[2]?.trim() || '',
     })
   }
@@ -241,7 +252,7 @@ const parseAiResponse = (text) => {
     // Ignore image markdown links like ![Poster](...)
     if (linkMatch.index > 0 && cleanText[linkMatch.index - 1] === '!') continue
 
-    const title = linkMatch[1]?.trim()
+    const title = normalizeDisplayText(linkMatch[1]?.trim() || '')
     const url = linkMatch[2]?.trim()
     if (title) {
       linkMovies.push({
@@ -288,6 +299,8 @@ const MovieRecommendationCard = ({
   isLoading,
   onWatch,
 }) => {
+  const [isReasonExpanded, setIsReasonExpanded] = useState(false)
+
   if (isLoading) {
     return (
       <div className="ai-movie-card ai-movie-card--loading">
@@ -331,7 +344,10 @@ const MovieRecommendationCard = ({
   const isPremium = detail?.isPremium || detail?.is_premium
 
   const title = detail?.title || fallbackTitle || (isVietnamese() ? 'Phim đề xuất' : 'Recommended movie')
+  const normalizedTitle = normalizeDisplayText(title)
   const canShowDetail = Boolean(movieId)
+  const reasonText = normalizeDisplayText(reason?.trim() || '')
+  const canExpandReason = reasonText.length > 110
 
   return (
     <div
@@ -352,7 +368,7 @@ const MovieRecommendationCard = ({
         )}
       </div>
       <div className="ai-movie-card__info">
-        <h4 className="ai-movie-card__title">{title}</h4>
+        <h4 className="ai-movie-card__title">{normalizedTitle}</h4>
 
         <div className="ai-movie-card__meta">
           {ratingNum != null && !isNaN(ratingNum) && (
@@ -376,7 +392,27 @@ const MovieRecommendationCard = ({
           </div>
         )}
 
-        {reason && <p className="ai-movie-card__reason">{reason}</p>}
+        {reasonText && (
+          <div className="ai-movie-card__reason-wrap">
+            <p className={`ai-movie-card__reason ${isReasonExpanded ? 'ai-movie-card__reason--expanded' : ''}`}>
+              {reasonText}
+            </p>
+            {canExpandReason && (
+              <button
+                className="ai-movie-card__reason-toggle"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsReasonExpanded((prev) => !prev)
+                }}
+              >
+                {isReasonExpanded
+                  ? (isVietnamese() ? 'thu gọn' : 'less')
+                  : (isVietnamese() ? 'thêm' : 'more')}
+              </button>
+            )}
+          </div>
+        )}
 
         <button
           className="ai-movie-card__watch"
@@ -614,12 +650,13 @@ const AIChatbot = ({ isOpen, onClose }) => {
 
   const handleSend = async (overrideText) => {
     const trimmed = (overrideText || inputValue).trim()
-    if (!trimmed || isLoading) return
+    const normalizedInput = normalizeDisplayText(trimmed)
+    if (!normalizedInput || isLoading) return
 
     if (!isLoggedIn) {
       setMessages((prev) => [
         ...prev,
-        { id: Date.now(), type: 'user', text: trimmed, movies: [] },
+        { id: Date.now(), type: 'user', text: normalizedInput, movies: [] },
         {
           id: Date.now() + 1,
           type: 'ai',
@@ -633,7 +670,8 @@ const AIChatbot = ({ isOpen, onClose }) => {
 
     // Add user message
     const userMsg = { id: Date.now(), type: 'user', text: trimmed, movies: [] }
-    setMessages((prev) => [...prev, userMsg])
+    const normalizedUserMsg = { ...userMsg, text: normalizedInput }
+    setMessages((prev) => [...prev, normalizedUserMsg])
     setInputValue('')
     setIsLoading(true)
 
@@ -647,7 +685,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
       }
 
       // Send message to AI via backend
-      const response = await chatService.sendMessage(currentSessionId, trimmed)
+      const response = await chatService.sendMessage(currentSessionId, normalizedInput)
       const aiContent = response.data?.content || response.data?.text || ''
 
       const { cleanText, movies } = parseAiResponse(aiContent)
