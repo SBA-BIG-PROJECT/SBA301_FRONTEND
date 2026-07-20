@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import Spinner from '../components/Spinner.jsx'
-import { movieService, reviewService } from '../services'
+import { movieService, reviewService, commentService } from '../services'
 import { useHistory } from '../hooks/useHistory'
 import { useAuth } from '../hooks/useAuth'
 import { useToast, ToastContainer } from '../components/Toast.jsx'
@@ -16,7 +16,7 @@ const Watch = () => {
   const [errorMessage, setErrorMessage] = useState('')
   
   // States for comment/review
-  const [reviews, setReviews] = useState([])
+  const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
   const [newRating, setNewRating] = useState(5.0)
   const [submitting, setSubmitting] = useState(false)
@@ -58,7 +58,7 @@ const Watch = () => {
         // Load movie details, reviews, and related movies in parallel
         const [movieData, reviewsData, relatedData] = await Promise.all([
           movieService.getMovieDetail(id),
-          reviewService.getReviews(id, { page: 0, size: 50 }).catch(() => ({ content: [] })),
+          commentService.getRootComments(id, { page: 0, size: 50 }).catch(() => ({ content: [] })),
           movieService.getMovies({ page: 0, size: 10 }).catch(() => ({ content: [] }))
         ])
 
@@ -67,7 +67,7 @@ const Watch = () => {
         }
 
         setMovie(movieData)
-        setReviews(reviewsData.content || [])
+        setComments(reviewsData.content || [])
         setRelatedMovies(relatedData.content || relatedData || [])
         
         // Try resolving the playToken if available
@@ -313,14 +313,12 @@ const Watch = () => {
     
     setSubmitting(true)
     try {
-      const review = await reviewService.createReview(id, {
-        rating: newRating * 2,
-        comment: newComment
+      const comment = await commentService.createComment(id, {
+        content: newComment
       })
-      // Add new review to top of list
-      setReviews(prev => [review, ...prev])
+      // Add new comment to top of list
+      setComments(prev => [comment, ...prev])
       setNewComment('')
-      setNewRating(5.0)
     } catch (error) {
       console.error('Failed to create review', error)
       showToast('error', error.response?.data?.message || 'Failed to post comment. Please try again.')
@@ -519,10 +517,6 @@ const Watch = () => {
                     />
                     
                     <div className="absolute bottom-3 right-3 flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer text-xs text-gray-400 hover:text-gray-300 transition-colors bg-[#1a1c22] px-2 py-1 rounded-md border border-gray-800">
-                        <input type="checkbox" className="rounded bg-gray-800 border-gray-700 text-red-500 focus:ring-red-500 w-3 h-3" />
-                        Spoilers
-                      </label>
                       <button 
                         type="submit"
                         disabled={submitting || !newComment.trim()}
@@ -538,16 +532,16 @@ const Watch = () => {
 
             {/* Comments List */}
             <div className="flex flex-col border-t border-gray-800 pt-6">
-              {reviews.length === 0 ? (
+              {comments.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center">
                   <p className="text-gray-500 text-sm">No comments yet</p>
                 </div>
               ) : (
-                reviews.map((review, index) => (
-                  <div key={review.id || index} className="flex gap-4 py-5 border-b border-gray-800/50 last:border-0">
+                comments.map((comment, index) => (
+                  <div key={comment.id || index} className="flex gap-4 py-5 border-b border-gray-800/50 last:border-0">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-[#242730] flex items-center justify-center font-bold text-gray-400 text-lg border border-gray-700">
-                        {review.userName?.charAt(0)?.toUpperCase() || 'U'}
+                        {comment.authorName?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                       <div className="text-[10px] text-gray-500 text-center mt-1 uppercase font-semibold tracking-wider">
                         Wall
@@ -556,24 +550,21 @@ const Watch = () => {
                     
                     <div className="flex-1">
                       <div className="flex items-baseline gap-2 mb-2">
-                        <h4 className="font-bold text-gray-200 text-[15px]">{review.userName || 'Anonymous user'}</h4>
+                        <h4 className="font-bold text-gray-200 text-[15px]">{comment.authorName || 'Anonymous user'}</h4>
                         <span className="text-xs text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">Lv.1 - Beginner</span>
                       </div>
                       
                       <div className="text-gray-300 text-[15px] leading-relaxed whitespace-pre-wrap mb-3">
-                        {review.comment}
+                        {comment.content}
                       </div>
                       
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <button className="flex items-center gap-1 hover:text-white transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                        </button>
-                        <button className="flex items-center gap-1 hover:text-white transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" /></svg>
+                          <svg className="w-4 h-4" fill={comment.liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
                         </button>
                         <span>
-                          {review.createdAt ? (() => {
-                            const date = new Date(review.createdAt);
+                          {comment.createdAt ? (() => {
+                            const date = new Date(comment.createdAt);
                             const now = new Date();
                             const diffTime = Math.abs(now - date);
                             const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
@@ -588,7 +579,7 @@ const Watch = () => {
                 ))
               )}
               
-              {reviews.length > 0 && (
+              {comments.length > 0 && (
                 <button className="w-full mt-6 bg-[#1a1c22] hover:bg-[#242730] text-gray-300 py-3 rounded-lg font-medium transition-colors text-sm border border-gray-800">
                   Load more comments
                 </button>

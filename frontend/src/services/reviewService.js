@@ -43,6 +43,22 @@ const reviewService = {
   },
 
   /**
+   * Get current user's review for a movie
+   * GET /movies/{movieId}/reviews/me
+   */
+  async getMyReview(movieId) {
+    try {
+      const response = await apiClient.get(`/movies/${movieId}/reviews/me`)
+      return response.data
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null // Not found is expected if user hasn't rated yet
+      }
+      throw error
+    }
+  },
+
+  /**
    * Update review
    * PUT /reviews/{reviewId}
    * @param {number} reviewId
