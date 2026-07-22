@@ -303,7 +303,8 @@ const Home = () => {
                 id: m.movieId,
                 title: m.title,
                 poster_path: m.posterPath,
-                vote_average: m.score,
+                vote_average: m.voteAverage,
+                release_date: m.releaseDate,
                 isPremium: false,
                 reasons: m.reasons
               }))
