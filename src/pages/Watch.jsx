@@ -88,10 +88,9 @@ const Watch = () => {
             console.error('Failed to resolve play token:', tokenError)
             setErrorMessage('Failed to load trailer. Please try again.')
           }
-        } else {
+        } else if (!movieData?.isLocked) {
           setErrorMessage('Trailer not available for this movie.')
         }
-
         // Add to history when loaded
         if (movieData) {
           addToHistory(movieData)
