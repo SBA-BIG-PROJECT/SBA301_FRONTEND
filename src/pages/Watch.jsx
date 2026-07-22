@@ -21,6 +21,11 @@ const Watch = () => {
   const [newRating, setNewRating] = useState(5.0)
   const [submitting, setSubmitting] = useState(false)
   const [hoverRating, setHoverRating] = useState(0)
+  const [replyingTo, setReplyingTo] = useState(null)
+  const [replyContent, setReplyContent] = useState('')
+  const [submittingReply, setSubmittingReply] = useState(false)
+  const [replies, setReplies] = useState({})
+  const [showReplies, setShowReplies] = useState({})
 
   // Related movies
   const [relatedMovies, setRelatedMovies] = useState([])
@@ -330,12 +335,77 @@ const Watch = () => {
 
 
   const handleToggleLike = async (commentId) => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      showToast('warning', 'Please login to like comments')
+      return;
+    }
     try {
       const result = await commentService.toggleLike(commentId);
       setComments(prev => prev.map(c => 
         c.id === commentId ? { ...c, likeCount: result.likeCount, liked: result.liked } : c
       ));
+    } catch (error) {
+      console.error('Failed to toggle like', error);
+      showToast('error', 'Failed to like comment');
+    }
+  };
+
+  const handleLoadReplies = async (commentId) => {
+    if (showReplies[commentId] && replies[commentId]) {
+      setShowReplies(prev => ({ ...prev, [commentId]: false }))
+      return
+    }
+    try {
+      const data = await commentService.getReplies(commentId)
+      setReplies(prev => ({ ...prev, [commentId]: data.content || data || [] }))
+      setShowReplies(prev => ({ ...prev, [commentId]: true }))
+    } catch (error) {
+      console.error('Failed to load replies', error)
+      showToast('error', 'Failed to load replies')
+    }
+  }
+
+  const handleReplySubmit = async (e, parentId) => {
+    e.preventDefault()
+    if (!replyContent.trim()) return
+
+    setSubmittingReply(true)
+    try {
+      const reply = await commentService.createComment(id, {
+        content: replyContent,
+        parentCommentId: parentId
+      })
+      setReplies(prev => ({
+        ...prev,
+        [parentId]: [...(prev[parentId] || []), reply]
+      }))
+      setComments(prev => prev.map(c => 
+        c.id === parentId ? { ...c, replyCount: (c.replyCount || 0) + 1 } : c
+      ))
+      setReplyingTo(null)
+      setReplyContent('')
+      setShowReplies(prev => ({ ...prev, [parentId]: true }))
+    } catch (error) {
+      console.error('Failed to create reply', error)
+      showToast('error', error.response?.data?.message || 'Failed to post reply.')
+    } finally {
+      setSubmittingReply(false)
+    }
+  }
+
+  const handleToggleLikeReply = async (replyId, parentId) => {
+    if (!isAuthenticated) {
+      showToast('warning', 'Please login to like comments')
+      return;
+    }
+    try {
+      const result = await commentService.toggleLike(replyId);
+      setReplies(prev => ({
+        ...prev,
+        [parentId]: (prev[parentId] || []).map(r => 
+          r.id === replyId ? { ...r, likeCount: result.likeCount, liked: result.liked } : r
+        )
+      }));
     } catch (error) {
       console.error('Failed to toggle like', error);
     }
@@ -591,8 +661,12 @@ const Watch = () => {
                           <svg className="w-4 h-4" fill={commentItem.liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
                           <span>{commentItem.likeCount || ''}</span>
                         </button>
-                        <button className="flex items-center gap-1 hover:text-white transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" /></svg>
+                        <button 
+                          onClick={() => setReplyingTo(replyingTo === commentItem.id ? null : commentItem.id)}
+                          className="flex items-center gap-1 hover:text-white transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                          <span>Reply</span>
                         </button>
                         <span>
                           {commentItem.createdAt ? (() => {
@@ -606,8 +680,95 @@ const Watch = () => {
                           })() : 'Just now'}
                         </span>
                       </div>
+                      </div>
+
+                      {/* View Replies Button */}
+                      {commentItem.replyCount > 0 && (
+                        <div className="mt-3">
+                          <button 
+                            onClick={() => handleLoadReplies(commentItem.id)}
+                            className="text-[13px] text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 font-medium"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                            {showReplies[commentItem.id] ? 'Hide replies' : `View ${commentItem.replyCount} replies`}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Reply Input */}
+                      {replyingTo === commentItem.id && (
+                        <div className="mt-4 flex gap-3">
+                          <div className="w-8 h-8 rounded-full bg-[#242730] border border-gray-700 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-400">
+                            {user?.username?.charAt(0)?.toUpperCase() || 'U'}
+                          </div>
+                          <form className="flex-1" onSubmit={(e) => handleReplySubmit(e, commentItem.id)}>
+                            <textarea
+                              className="w-full bg-[#1a1c22] border border-gray-800 rounded-xl p-3 text-gray-200 focus:outline-none focus:border-red-500/50 resize-none min-h-[60px] text-[13px]"
+                              placeholder="Write a reply..."
+                              value={replyContent}
+                              onChange={(e) => setReplyContent(e.target.value)}
+                            />
+                            <div className="flex justify-end gap-2 mt-2">
+                              <button 
+                                type="button"
+                                onClick={() => setReplyingTo(null)}
+                                className="px-3 py-1 text-xs font-medium text-gray-400 hover:text-white transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button 
+                                type="submit"
+                                disabled={submittingReply || !replyContent.trim()}
+                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-full font-medium text-xs disabled:opacity-50"
+                              >
+                                {submittingReply ? 'Replying...' : 'Reply'}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+
+                      {/* Replies List */}
+                      {showReplies[commentItem.id] && replies[commentItem.id] && (
+                        <div className="mt-4 flex flex-col gap-5 pl-5 border-l-2 border-gray-800/50">
+                          {replies[commentItem.id].map(reply => (
+                            <div key={reply.id} className="flex gap-3">
+                              <div className="w-8 h-8 rounded-full bg-[#242730] border border-gray-700 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-400">
+                                {reply.authorName?.charAt(0)?.toUpperCase() || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-baseline gap-2 mb-1">
+                                  <h5 className="font-bold text-gray-200 text-[13px]">{reply.authorName || 'Anonymous'}</h5>
+                                </div>
+                                <div className="text-gray-400 text-[13px] leading-relaxed mb-2">
+                                  {reply.content}
+                                </div>
+                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                  <button 
+                                    onClick={() => handleToggleLikeReply(reply.id, commentItem.id)}
+                                    className={`flex items-center gap-1 transition-colors ${reply.liked ? 'text-red-500' : 'hover:text-white'}`}
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill={reply.liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
+                                    <span>{reply.likeCount || ''}</span>
+                                  </button>
+                                  <span>
+                                    {reply.createdAt ? (() => {
+                                      const date = new Date(reply.createdAt);
+                                      const now = new Date();
+                                      const diffTime = Math.abs(now - date);
+                                      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+                                      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                                      if (diffHours < 24) return `${diffHours || 1} h`;
+                                      return `${diffDays} d`;
+                                    })() : 'Just now'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
                 ))
               )}
 
@@ -654,10 +815,7 @@ const Watch = () => {
                     </div>
                   </div>
 
-                  {/* Top left badge */}
-                  <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                    TV/??
-                  </div>
+
 
                   {/* Bottom right rating */}
                   {relMovie.rating && (
