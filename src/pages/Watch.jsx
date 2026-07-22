@@ -26,6 +26,7 @@ const Watch = () => {
   const [submittingReply, setSubmittingReply] = useState(false)
   const [replies, setReplies] = useState({})
   const [showReplies, setShowReplies] = useState({})
+  const [dislikedComments, setDislikedComments] = useState(new Set())
 
   // Related movies
   const [relatedMovies, setRelatedMovies] = useState([])
@@ -343,6 +344,14 @@ const Watch = () => {
       setComments(prev => prev.map(c => 
         c.id === commentId ? { ...c, likeCount: result.likeCount, liked: result.liked } : c
       ));
+      // Remove dislike if liking
+      if (result.liked) {
+        setDislikedComments(prev => {
+          const next = new Set(prev)
+          next.delete(commentId)
+          return next
+        })
+      }
     } catch (error) {
       console.error('Failed to toggle like', error);
       showToast('error', 'Failed to like comment');
@@ -405,9 +414,63 @@ const Watch = () => {
           r.id === replyId ? { ...r, likeCount: result.likeCount, liked: result.liked } : r
         )
       }));
+      // Remove dislike if liking
+      if (result.liked) {
+        setDislikedComments(prev => {
+          const next = new Set(prev)
+          next.delete(`reply-${replyId}`)
+          return next
+        })
+      }
     } catch (error) {
       console.error('Failed to toggle like', error);
     }
+  };
+
+  const handleToggleDislike = async (commentId) => {
+    if (!isAuthenticated) {
+      showToast('warning', 'Please login to dislike comments')
+      return;
+    }
+    // If currently liked, unlike first
+    const isRealComment = !String(commentId).startsWith('reply-')
+    const currentComment = isRealComment ? comments.find(c => c.id === commentId) : null
+    if (currentComment?.liked) {
+      try {
+        const result = await commentService.toggleLike(commentId);
+        setComments(prev => prev.map(c => 
+          c.id === commentId ? { ...c, likeCount: result.likeCount, liked: false } : c
+        ));
+      } catch (e) { /* ignore */ }
+    }
+    // For reply likes, find and unlike
+    if (!isRealComment) {
+      const realReplyId = parseInt(String(commentId).replace('reply-', ''))
+      for (const [parentId, replyList] of Object.entries(replies)) {
+        const reply = replyList?.find(r => r.id === realReplyId)
+        if (reply?.liked) {
+          try {
+            const result = await commentService.toggleLike(realReplyId);
+            setReplies(prev => ({
+              ...prev,
+              [parentId]: (prev[parentId] || []).map(r => 
+                r.id === realReplyId ? { ...r, likeCount: result.likeCount, liked: false } : r
+              )
+            }));
+          } catch (e) { /* ignore */ }
+          break
+        }
+      }
+    }
+    setDislikedComments(prev => {
+      const next = new Set(prev)
+      if (next.has(commentId)) {
+        next.delete(commentId)
+      } else {
+        next.add(commentId)
+      }
+      return next
+    })
   };
 
   return (
@@ -601,10 +664,6 @@ const Watch = () => {
                     />
 
                     <div className="absolute bottom-3 right-3 flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer text-xs text-gray-400 hover:text-gray-300 transition-colors bg-[#1a1c22] px-2 py-1 rounded-md border border-gray-800">
-                        <input type="checkbox" className="rounded bg-gray-800 border-gray-700 text-red-500 focus:ring-red-500 w-3 h-3" />
-                        Spoilers
-                      </label>
                       <button
                         type="submit"
                         disabled={submitting || !newComment.trim()}
@@ -655,13 +714,17 @@ const Watch = () => {
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <button 
                           onClick={() => handleToggleLike(commentItem.id)}
-                          className={`flex items-center gap-1.5 transition-colors ${commentItem.liked ? 'text-red-500' : 'hover:text-white'}`}
+                          className={`flex items-center gap-1.5 transition-colors ${commentItem.liked ? 'text-blue-400' : 'hover:text-white'}`}
                         >
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
                           <span>{commentItem.likeCount || ''}</span>
                         </button>
-                        <button className="flex items-center hover:text-white transition-colors">
+                        <button 
+                          onClick={() => handleToggleDislike(commentItem.id)}
+                          className={`flex items-center gap-1.5 transition-colors ${dislikedComments.has(commentItem.id) ? 'text-red-400' : 'hover:text-white'}`}
+                        >
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
+                          <span>{dislikedComments.has(commentItem.id) ? 1 : ''}</span>
                         </button>
                         <button 
                           onClick={() => setReplyingTo(replyingTo === commentItem.id ? null : commentItem.id)}
@@ -681,7 +744,6 @@ const Watch = () => {
                           })() : 'Just now'}
                         </span>
                       </div>
-                      </div>
 
                       {/* View Replies Button */}
                       {commentItem.replyCount > 0 && (
@@ -698,11 +760,8 @@ const Watch = () => {
 
                       {/* Reply Input */}
                       {replyingTo === commentItem.id && (
-                        <div className="mt-4 flex gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#242730] border border-gray-700 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-400">
-                            {user?.username?.charAt(0)?.toUpperCase() || 'U'}
-                          </div>
-                          <form className="flex-1" onSubmit={(e) => handleReplySubmit(e, commentItem.id)}>
+                        <div className="mt-4">
+                          <form onSubmit={(e) => handleReplySubmit(e, commentItem.id)}>
                             <textarea
                               className="w-full bg-[#1a1c22] border border-gray-800 rounded-xl p-3 text-gray-200 focus:outline-none focus:border-red-500/50 resize-none min-h-[60px] text-[13px]"
                               placeholder="Write a reply..."
@@ -747,13 +806,17 @@ const Watch = () => {
                                 <div className="flex items-center gap-4 text-xs text-gray-500">
                                   <button 
                                     onClick={() => handleToggleLikeReply(reply.id, commentItem.id)}
-                                    className={`flex items-center gap-1.5 transition-colors ${reply.liked ? 'text-red-500' : 'hover:text-white'}`}
+                                    className={`flex items-center gap-1.5 transition-colors ${reply.liked ? 'text-blue-400' : 'hover:text-white'}`}
                                   >
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
                                     <span>{reply.likeCount || ''}</span>
                                   </button>
-                                  <button className="flex items-center hover:text-white transition-colors">
+                                  <button 
+                                    onClick={() => handleToggleDislike(`reply-${reply.id}`)}
+                                    className={`flex items-center gap-1.5 transition-colors ${dislikedComments.has(`reply-${reply.id}`) ? 'text-red-400' : 'hover:text-white'}`}
+                                  >
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
+                                    <span>{dislikedComments.has(`reply-${reply.id}`) ? 1 : ''}</span>
                                   </button>
                                   <span>
                                     {reply.createdAt ? (() => {
@@ -773,6 +836,7 @@ const Watch = () => {
                         </div>
                       )}
                     </div>
+                  </div>
                 ))
               )}
 

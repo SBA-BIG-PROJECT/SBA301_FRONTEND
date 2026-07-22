@@ -478,7 +478,7 @@ const Home = () => {
           <div className="flex gap-4 overflow-x-auto pb-6 hide-scrollbar snap-x w-full" style={{ scrollBehavior: 'smooth' }}>
             {recommendedMovies.map((movie) => (
               <div key={movie.id} className="snap-start shrink-0 w-[180px] sm:w-[220px] flex flex-col">
-                <MovieCard movie={movie} onNavigate={navigate} />
+                <MovieCard movie={movie} onNavigate={navigate} showToast={showToast} />
                 {movie.reasons && movie.reasons.length > 0 && (
                   <p className="text-xs text-yellow-500/80 mt-2 italic px-1 line-clamp-2 leading-relaxed">
                     ✨ {movie.reasons[0]}
