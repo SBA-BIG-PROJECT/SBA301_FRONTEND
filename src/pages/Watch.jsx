@@ -656,17 +656,19 @@ const Watch = () => {
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <button 
                           onClick={() => handleToggleLike(commentItem.id)}
-                          className={`flex items-center gap-1 transition-colors ${commentItem.liked ? 'text-red-500' : 'hover:text-white'}`}
+                          className={`flex items-center gap-1.5 transition-colors ${commentItem.liked ? 'text-red-500' : 'hover:text-white'}`}
                         >
-                          <svg className="w-4 h-4" fill={commentItem.liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
                           <span>{commentItem.likeCount || ''}</span>
+                        </button>
+                        <button className="flex items-center hover:text-white transition-colors">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
                         </button>
                         <button 
                           onClick={() => setReplyingTo(replyingTo === commentItem.id ? null : commentItem.id)}
-                          className="flex items-center gap-1 hover:text-white transition-colors"
+                          className="flex items-center ml-2 hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-                          <span>Reply</span>
+                          Reply
                         </button>
                         <span>
                           {commentItem.createdAt ? (() => {
@@ -730,7 +732,7 @@ const Watch = () => {
 
                       {/* Replies List */}
                       {showReplies[commentItem.id] && replies[commentItem.id] && (
-                        <div className="mt-4 flex flex-col gap-5 pl-5 border-l-2 border-gray-800/50">
+                        <div className="mt-4 flex flex-col gap-5 pl-5 ml-[22px] border-l-2 border-red-900/40">
                           {replies[commentItem.id].map(reply => (
                             <div key={reply.id} className="flex gap-3">
                               <div className="w-8 h-8 rounded-full bg-[#242730] border border-gray-700 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-400">
@@ -746,10 +748,13 @@ const Watch = () => {
                                 <div className="flex items-center gap-4 text-xs text-gray-500">
                                   <button 
                                     onClick={() => handleToggleLikeReply(reply.id, commentItem.id)}
-                                    className={`flex items-center gap-1 transition-colors ${reply.liked ? 'text-red-500' : 'hover:text-white'}`}
+                                    className={`flex items-center gap-1.5 transition-colors ${reply.liked ? 'text-red-500' : 'hover:text-white'}`}
                                   >
-                                    <svg className="w-3.5 h-3.5" fill={reply.liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
                                     <span>{reply.likeCount || ''}</span>
+                                  </button>
+                                  <button className="flex items-center hover:text-white transition-colors">
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
                                   </button>
                                   <span>
                                     {reply.createdAt ? (() => {
