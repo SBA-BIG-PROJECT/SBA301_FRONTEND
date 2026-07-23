@@ -200,85 +200,114 @@ const AdminDashboard = () => {
                         <div className="flex justify-center py-20 text-[#94a3b8]">Loading dashboard metrics...</div>
                     ) : stats ? (
                         <>
-                            {/* Bento Grid KPIs */}
-                            <section className="grid grid-cols-2 md:grid-cols-4 gap-[16px] md:gap-[24px]">
-                                {/* KPI 1 */}
-                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[24px] border border-[#334155] hover:border-[#475569] transition-colors group">
+                            {/* Bento Grid KPIs - 5 columns x 2 rows = 10 perfectly balanced cards */}
+                            <section className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-[16px] md:gap-[20px]">
+                                {/* 1. Total Users */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
                                     <div className="flex justify-between items-start mb-[8px]">
-                                        <span className="text-[#94a3b8] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase tracking-wider">Total Users</span>
-                                        <span className="material-symbols-outlined text-[#E50914] bg-[#E50914]/10 p-1 rounded">group</span>
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Total Users</span>
+                                        <span className="material-symbols-outlined text-[#E50914] bg-[#E50914]/10 p-1 rounded text-[20px]">group</span>
                                     </div>
-                                    <div className="text-[32px] leading-[40px] tracking-[-0.01em] font-bold text-[#f8fafc] group-hover:text-[#E50914] transition-colors">
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-[#E50914] transition-colors">
                                         {formatNumber(stats.totalUsers)}
                                     </div>
                                 </div>
-                                {/* KPI 2 */}
-                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[24px] border border-[#334155] hover:border-[#475569] transition-colors group">
+
+                                {/* 2. Active Users */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
                                     <div className="flex justify-between items-start mb-[8px]">
-                                        <span className="text-[#94a3b8] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase tracking-wider">Active Users</span>
-                                        <span className="material-symbols-outlined text-[#7bd0ff] bg-[#7bd0ff]/10 p-1 rounded">person_play</span>
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Active Users</span>
+                                        <span className="material-symbols-outlined text-[#7bd0ff] bg-[#7bd0ff]/10 p-1 rounded text-[20px]">person_play</span>
                                     </div>
-                                    <div className="text-[32px] leading-[40px] tracking-[-0.01em] font-bold text-[#f8fafc] group-hover:text-[#7bd0ff] transition-colors">
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-[#7bd0ff] transition-colors">
                                         {formatNumber(stats.activeUsers)}
                                     </div>
                                 </div>
-                                {/* KPI 3 */}
-                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[24px] border border-[#334155] hover:border-[#475569] transition-colors group">
+
+                                {/* 3. Premium Users */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
                                     <div className="flex justify-between items-start mb-[8px]">
-                                        <span className="text-[#94a3b8] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase tracking-wider">Premium Users</span>
-                                        <span className="material-symbols-outlined text-amber-400 bg-amber-400/10 p-1 rounded">workspace_premium</span>
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Premium Users</span>
+                                        <span className="material-symbols-outlined text-amber-400 bg-amber-400/10 p-1 rounded text-[20px]">workspace_premium</span>
                                     </div>
-                                    <div className="text-[32px] leading-[40px] tracking-[-0.01em] font-bold text-[#f8fafc] group-hover:text-amber-400 transition-colors">
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-amber-400 transition-colors">
                                         {formatNumber(stats.premiumUsers)}
                                     </div>
                                 </div>
-                                {/* KPI 4 */}
-                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[24px] border border-[#334155] hover:border-[#475569] transition-colors group">
+
+                                {/* 4. New Users Today */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
                                     <div className="flex justify-between items-start mb-[8px]">
-                                        <span className="text-[#94a3b8] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase tracking-wider">New Users Today</span>
-                                        <span className="material-symbols-outlined text-cyan-400 bg-cyan-400/10 p-1 rounded">person_add</span>
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">New Users</span>
+                                        <span className="material-symbols-outlined text-cyan-400 bg-cyan-400/10 p-1 rounded text-[20px]">person_add</span>
                                     </div>
-                                    <div className="text-[32px] leading-[40px] tracking-[-0.01em] font-bold text-[#f8fafc] group-hover:text-cyan-400 transition-colors">
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-cyan-400 transition-colors">
                                         {formatNumber(stats.newUsersToday)}
                                     </div>
                                 </div>
-                                {/* KPI 5 */}
-                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[24px] border border-[#334155] hover:border-[#475569] transition-colors group">
+
+                                {/* 5. Total Revenue */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
                                     <div className="flex justify-between items-start mb-[8px]">
-                                        <span className="text-[#94a3b8] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase tracking-wider">Total Movies</span>
-                                        <span className="material-symbols-outlined text-purple-400 bg-purple-400/10 p-1 rounded">movie</span>
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Total Revenue</span>
+                                        <span className="material-symbols-outlined text-emerald-400 bg-emerald-400/10 p-1 rounded text-[20px]">payments</span>
                                     </div>
-                                    <div className="text-[32px] leading-[40px] tracking-[-0.01em] font-bold text-[#f8fafc] group-hover:text-purple-400 transition-colors">
-                                        {formatNumber(stats.totalMovies)}
-                                    </div>
-                                </div>
-                                {/* KPI 6 */}
-                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[24px] border border-[#334155] hover:border-[#475569] transition-colors group">
-                                    <div className="flex justify-between items-start mb-[8px]">
-                                        <span className="text-[#94a3b8] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase tracking-wider">Total Revenue</span>
-                                        <span className="material-symbols-outlined text-emerald-400 bg-emerald-400/10 p-1 rounded">payments</span>
-                                    </div>
-                                    <div className="text-[32px] leading-[40px] tracking-[-0.01em] font-bold text-[#f8fafc] group-hover:text-emerald-400 transition-colors">
+                                    <div className="text-[24px] xl:text-[26px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-emerald-400 transition-colors truncate">
                                         {formatCurrency(stats.totalRevenue)}
                                     </div>
                                 </div>
-                                {/* KPI 7 */}
-                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[24px] border border-[#334155] hover:border-[#475569] transition-colors group">
+
+                                {/* 6. Total Movies */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
                                     <div className="flex justify-between items-start mb-[8px]">
-                                        <span className="text-[#94a3b8] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase tracking-wider">Total Views</span>
-                                        <span className="material-symbols-outlined text-blue-400 bg-blue-400/10 p-1 rounded">visibility</span>
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Total Movies</span>
+                                        <span className="material-symbols-outlined text-purple-400 bg-purple-400/10 p-1 rounded text-[20px]">movie</span>
                                     </div>
-                                    <div className="text-[32px] leading-[40px] tracking-[-0.01em] font-bold text-[#f8fafc] group-hover:text-blue-400 transition-colors">
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-purple-400 transition-colors">
+                                        {formatNumber(stats.totalMovies)}
+                                    </div>
+                                </div>
+
+                                {/* 7. Premium Movies */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
+                                    <div className="flex justify-between items-start mb-[8px]">
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Premium Movies</span>
+                                        <span className="material-symbols-outlined text-amber-400 bg-amber-400/10 p-1 rounded text-[20px]">star</span>
+                                    </div>
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-amber-400 transition-colors">
+                                        {formatNumber(stats.premiumMovies)}
+                                    </div>
+                                </div>
+
+                                {/* 8. Standard Movies */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
+                                    <div className="flex justify-between items-start mb-[8px]">
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Standard Movies</span>
+                                        <span className="material-symbols-outlined text-blue-400 bg-blue-400/10 p-1 rounded text-[20px]">movie_filter</span>
+                                    </div>
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-blue-400 transition-colors">
+                                        {formatNumber(stats.standardMovies)}
+                                    </div>
+                                </div>
+
+                                {/* 9. Total Views */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
+                                    <div className="flex justify-between items-start mb-[8px]">
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Total Views</span>
+                                        <span className="material-symbols-outlined text-indigo-400 bg-indigo-400/10 p-1 rounded text-[20px]">visibility</span>
+                                    </div>
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-indigo-400 transition-colors">
                                         {formatNumber(stats.totalViews)}
                                     </div>
                                 </div>
-                                {/* KPI 8 */}
-                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[24px] border border-[#334155] hover:border-[#475569] transition-colors group">
+
+                                {/* 10. Total Reviews */}
+                                <div className="bg-[#1E293B] rounded-xl p-[16px] md:p-[20px] border border-[#334155] hover:border-[#475569] transition-colors group">
                                     <div className="flex justify-between items-start mb-[8px]">
-                                        <span className="text-[#94a3b8] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase tracking-wider">Total Reviews</span>
-                                        <span className="material-symbols-outlined text-pink-400 bg-pink-400/10 p-1 rounded">reviews</span>
+                                        <span className="text-[#94a3b8] text-[11px] leading-[16px] font-semibold uppercase tracking-wider">Total Reviews</span>
+                                        <span className="material-symbols-outlined text-pink-400 bg-pink-400/10 p-1 rounded text-[20px]">reviews</span>
                                     </div>
-                                    <div className="text-[32px] leading-[40px] tracking-[-0.01em] font-bold text-[#f8fafc] group-hover:text-pink-400 transition-colors">
+                                    <div className="text-[28px] leading-[36px] font-bold text-[#f8fafc] group-hover:text-pink-400 transition-colors">
                                         {formatNumber(stats.totalReviews)}
                                     </div>
                                 </div>

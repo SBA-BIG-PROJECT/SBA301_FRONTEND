@@ -11,6 +11,11 @@ const AdminGenres = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Pagination state (4 items per page for visual balance)
+  const [genrePage, setGenrePage] = useState(0);
+  const [categoryPage, setCategoryPage] = useState(0);
+  const PAGE_SIZE = 4;
+
   // Modals state
   const [showGenreModal, setShowGenreModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -218,7 +223,7 @@ const AdminGenres = () => {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-[24px] flex-1">
               
               {/* Genres Pane */}
-              <section className="bg-[#1E293B] border border-[#334155] rounded-xl flex flex-col overflow-hidden min-h-[600px]">
+              <section className="bg-[#1E293B] border border-[#334155] rounded-xl flex flex-col overflow-hidden">
                 <div className="p-[24px] border-b border-[#334155] bg-[#1E293B] flex justify-between items-center sticky top-0 z-10">
                   <div className="flex items-center gap-[8px]">
                     <span className="material-symbols-outlined text-[#E50914]">category</span>
@@ -241,7 +246,7 @@ const AdminGenres = () => {
                         <tr><td colSpan="4" className="text-center py-8 text-[#94A3B8]">Loading genres...</td></tr>
                       ) : genres.length === 0 ? (
                         <tr><td colSpan="4" className="text-center py-8 text-[#94A3B8]">No genres found</td></tr>
-                      ) : genres.map(genre => (
+                      ) : genres.slice(genrePage * PAGE_SIZE, (genrePage + 1) * PAGE_SIZE).map(genre => (
                         <tr key={genre.id} className="border-b border-[#334155] hover:bg-[#334155]/50 transition-colors group">
                           <td className="py-[16px] px-[24px] font-mono text-[#94A3B8]">G-{genre.id}</td>
                           <td className="py-[16px] px-[24px] font-medium text-[#f8fafc]">{genre.name}</td>
@@ -257,10 +262,33 @@ const AdminGenres = () => {
                     </tbody>
                   </table>
                 </div>
+                {/* Pagination Footer */}
+                {genres.length > 0 && (
+                  <div className="p-[16px] border-t border-[#334155] bg-[#1E293B] flex items-center justify-between text-[13px] text-[#94A3B8]">
+                    <span>
+                      Showing {genrePage * PAGE_SIZE + 1}-{Math.min((genrePage + 1) * PAGE_SIZE, genres.length)} of {genres.length}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => setGenrePage(p => Math.max(0, p - 1))}
+                        disabled={genrePage === 0}
+                        className="px-3 py-1.5 rounded-lg bg-[#0F172A] border border-[#334155] hover:border-[#94A3B8] disabled:opacity-40 disabled:hover:border-[#334155] transition-colors text-white text-xs font-medium cursor-pointer disabled:cursor-not-allowed">
+                        Prev
+                      </button>
+                      <span className="font-mono text-white text-xs px-2">{genrePage + 1} / {Math.ceil(genres.length / PAGE_SIZE) || 1}</span>
+                      <button 
+                        onClick={() => setGenrePage(p => Math.min(Math.ceil(genres.length / PAGE_SIZE) - 1, p + 1))}
+                        disabled={genrePage >= Math.ceil(genres.length / PAGE_SIZE) - 1}
+                        className="px-3 py-1.5 rounded-lg bg-[#0F172A] border border-[#334155] hover:border-[#94A3B8] disabled:opacity-40 disabled:hover:border-[#334155] transition-colors text-white text-xs font-medium cursor-pointer disabled:cursor-not-allowed">
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
               </section>
 
               {/* Categories Pane */}
-              <section className="bg-[#1E293B] border border-[#334155] rounded-xl flex flex-col overflow-hidden min-h-[600px]">
+              <section className="bg-[#1E293B] border border-[#334155] rounded-xl flex flex-col overflow-hidden">
                 <div className="p-[24px] border-b border-[#334155] bg-[#1E293B] flex justify-between items-center sticky top-0 z-10">
                   <div className="flex items-center gap-[8px]">
                     <span className="material-symbols-outlined text-cyan-400">list</span>
@@ -283,7 +311,7 @@ const AdminGenres = () => {
                         <tr><td colSpan="4" className="text-center py-8 text-[#94A3B8]">Loading categories...</td></tr>
                       ) : categories.length === 0 ? (
                         <tr><td colSpan="4" className="text-center py-8 text-[#94A3B8]">No categories found</td></tr>
-                      ) : categories.map(category => (
+                      ) : categories.slice(categoryPage * PAGE_SIZE, (categoryPage + 1) * PAGE_SIZE).map(category => (
                         <tr key={category.id} className="border-b border-[#334155] hover:bg-[#334155]/50 transition-colors group">
                           <td className="py-[16px] px-[24px] font-mono text-[#94A3B8]">C-{category.id}</td>
                           <td className="py-[16px] px-[24px] font-medium text-[#f8fafc] flex items-center gap-[8px]">
@@ -300,6 +328,29 @@ const AdminGenres = () => {
                     </tbody>
                   </table>
                 </div>
+                {/* Pagination Footer */}
+                {categories.length > 0 && (
+                  <div className="p-[16px] border-t border-[#334155] bg-[#1E293B] flex items-center justify-between text-[13px] text-[#94A3B8]">
+                    <span>
+                      Showing {categoryPage * PAGE_SIZE + 1}-{Math.min((categoryPage + 1) * PAGE_SIZE, categories.length)} of {categories.length}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => setCategoryPage(p => Math.max(0, p - 1))}
+                        disabled={categoryPage === 0}
+                        className="px-3 py-1.5 rounded-lg bg-[#0F172A] border border-[#334155] hover:border-[#94A3B8] disabled:opacity-40 disabled:hover:border-[#334155] transition-colors text-white text-xs font-medium cursor-pointer disabled:cursor-not-allowed">
+                        Prev
+                      </button>
+                      <span className="font-mono text-white text-xs px-2">{categoryPage + 1} / {Math.ceil(categories.length / PAGE_SIZE) || 1}</span>
+                      <button 
+                        onClick={() => setCategoryPage(p => Math.min(Math.ceil(categories.length / PAGE_SIZE) - 1, p + 1))}
+                        disabled={categoryPage >= Math.ceil(categories.length / PAGE_SIZE) - 1}
+                        className="px-3 py-1.5 rounded-lg bg-[#0F172A] border border-[#334155] hover:border-[#94A3B8] disabled:opacity-40 disabled:hover:border-[#334155] transition-colors text-white text-xs font-medium cursor-pointer disabled:cursor-not-allowed">
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
               </section>
 
             </div>
