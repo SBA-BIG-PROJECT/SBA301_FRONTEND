@@ -168,10 +168,12 @@ const Detail = () => {
         await removeFromWatchlist(parseInt(id))
         setInWatchlist(false)
         showToast('success', 'Removed from watchlist')
+        window.dispatchEvent(new CustomEvent('notifications-refresh'))
       } else {
         await addToWatchlist(parseInt(id))
         setInWatchlist(true)
         showToast('success', 'Added to watchlist')
+        window.dispatchEvent(new CustomEvent('notifications-refresh'))
       }
     } catch (error) {
       console.error('Watchlist error:', error)

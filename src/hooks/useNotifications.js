@@ -63,6 +63,16 @@ export const useNotifications = () => {
     }
   }, [fetchNotifications, fetchUnreadCount])
 
+  // Listen for custom refresh events from other components
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchNotifications(0)
+      fetchUnreadCount()
+    }
+    window.addEventListener('notifications-refresh', handleRefresh)
+    return () => window.removeEventListener('notifications-refresh', handleRefresh)
+  }, [fetchNotifications, fetchUnreadCount])
+
   // Mark all as read
   const markAllAsRead = async () => {
     if (!authService.isAuthenticated()) {

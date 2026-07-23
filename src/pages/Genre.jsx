@@ -66,10 +66,10 @@ const Genre = () => {
   }, [id, genreId])
 
   return (
-    <section className="search-results">
-      <div className="row__header">
-        <h2>{genreName ? `${genreName} Movies` : 'Genre'}</h2>
-        <Link className="btn btn--ghost" to="/">
+    <section className="search-results pt-[100px] pb-10 container">
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-bold text-white">{genreName ? `${genreName} Movies` : 'Genre'}</h2>
+        <Link className="hm-btn hm-btn--ghost" to="/">
           Back to Home
         </Link>
       </div>
@@ -83,28 +83,18 @@ const Genre = () => {
           No movies found for this genre yet.
         </p>
       ) : (
-        <div className="search-results__grid">
+        <div className="hm-grid">
           {movies.map((movie) => (
-            <div className="movie-card__cell" key={movie.id}>
-              <Link className="movie-card__link" to={`/movie/${movie.id}`}>
-                <MovieCard movie={{
-                  id: movie.id,
-                  title: movie.title,
-                  poster_path: movie.posterPath,
-                  vote_average: movie.voteAverage,
-                  release_date: movie.releaseDate,
-                  isPremium: movie.isPremium
-                }} />
-              </Link>
-              <div className="movie-card__actions">
-                <Link className="btn btn--ghost" to={`/movie/${movie.id}`}>
-                  View Details
-                </Link>
-                <Link className="btn btn--primary" to={`/watch/${movie.id}`}>
-                  Trailer
-                </Link>
-              </div>
-            </div>
+            <Link className="hm-card" to={`/movie/${movie.id}`} key={movie.id}>
+              <MovieCard movie={{
+                id: movie.id,
+                title: movie.title,
+                poster_path: movie.posterPath,
+                vote_average: movie.voteAverage,
+                release_date: movie.releaseDate,
+                isPremium: movie.isPremium
+              }} />
+            </Link>
           ))}
         </div>
       )}

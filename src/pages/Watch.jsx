@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import Spinner from '../components/Spinner.jsx'
-import { movieService, reviewService, commentService } from '../services'
+import { movieService, commentService } from '../services'
 import { useHistory } from '../hooks/useHistory'
 import { useAuth } from '../hooks/useAuth'
 import { useToast, ToastContainer } from '../components/Toast.jsx'
@@ -14,14 +14,20 @@ const Watch = () => {
   const [embedUrl, setEmbedUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  
+
   // States for comment/review
   const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
   const [newRating, setNewRating] = useState(5.0)
   const [submitting, setSubmitting] = useState(false)
   const [hoverRating, setHoverRating] = useState(0)
-  
+  const [replyingTo, setReplyingTo] = useState(null)
+  const [replyContent, setReplyContent] = useState('')
+  const [submittingReply, setSubmittingReply] = useState(false)
+  const [replies, setReplies] = useState({})
+  const [showReplies, setShowReplies] = useState({})
+  const [dislikedComments, setDislikedComments] = useState(new Set())
+
   // Related movies
   const [relatedMovies, setRelatedMovies] = useState([])
 
@@ -35,7 +41,7 @@ const Watch = () => {
   const [isMuted, setIsMuted] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  
+
   const { addToHistory } = useHistory()
   const { isAuthenticated, user } = useAuth()
 
@@ -55,10 +61,10 @@ const Watch = () => {
       setErrorMessage('')
 
       try {
-        // Load movie details, reviews, and related movies in parallel
-        const [movieData, reviewsData, relatedData] = await Promise.all([
+        // Load movie details, comments, and related movies in parallel
+        const [movieData, commentsData, relatedData] = await Promise.all([
           movieService.getMovieDetail(id),
-          commentService.getRootComments(id, { page: 0, size: 50 }).catch(() => ({ content: [] })),
+          commentService.getComments(id).catch(() => ({ content: [] })),
           movieService.getMovies({ page: 0, size: 10 }).catch(() => ({ content: [] }))
         ])
 
@@ -67,9 +73,9 @@ const Watch = () => {
         }
 
         setMovie(movieData)
-        setComments(reviewsData.content || [])
+        setComments(commentsData.content || commentsData || [])
         setRelatedMovies(relatedData.content || relatedData || [])
-        
+
         // Try resolving the playToken if available
         if (movieData?.playToken) {
           try {
@@ -83,10 +89,9 @@ const Watch = () => {
             console.error('Failed to resolve play token:', tokenError)
             setErrorMessage('Failed to load trailer. Please try again.')
           }
-        } else {
+        } else if (!movieData?.isLocked) {
           setErrorMessage('Trailer not available for this movie.')
         }
-        
         // Add to history when loaded
         if (movieData) {
           addToHistory(movieData)
@@ -107,7 +112,6 @@ const Watch = () => {
 
   }, [id])
 
-  // NOTE: DevTools blocking temporarily disabled for debugging
   useEffect(() => {
     const handleContextMenu = (e) => e.preventDefault();
     const handleKeyDown = (e) => {
@@ -127,7 +131,6 @@ const Watch = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [showToast]);
-
 
   // --- Load YouTube IFrame API ---
   useEffect(() => {
@@ -312,7 +315,7 @@ const Watch = () => {
   const handleCommentSubmit = async (e) => {
     e.preventDefault()
     if (!newComment.trim()) return
-    
+
     setSubmitting(true)
     try {
       const comment = await commentService.createComment(id, {
@@ -330,6 +333,145 @@ const Watch = () => {
   }
 
 
+
+  const handleToggleLike = async (commentId) => {
+    if (!isAuthenticated) {
+      showToast('warning', 'Please login to like comments')
+      return;
+    }
+    try {
+      const result = await commentService.toggleLike(commentId);
+      setComments(prev => prev.map(c => 
+        c.id === commentId ? { ...c, likeCount: result.likeCount, liked: result.liked } : c
+      ));
+      // Remove dislike if liking
+      if (result.liked) {
+        setDislikedComments(prev => {
+          const next = new Set(prev)
+          next.delete(commentId)
+          return next
+        })
+      }
+    } catch (error) {
+      console.error('Failed to toggle like', error);
+      showToast('error', 'Failed to like comment');
+    }
+  };
+
+  const handleLoadReplies = async (commentId) => {
+    if (showReplies[commentId] && replies[commentId]) {
+      setShowReplies(prev => ({ ...prev, [commentId]: false }))
+      return
+    }
+    try {
+      const data = await commentService.getReplies(commentId)
+      setReplies(prev => ({ ...prev, [commentId]: data.content || data || [] }))
+      setShowReplies(prev => ({ ...prev, [commentId]: true }))
+    } catch (error) {
+      console.error('Failed to load replies', error)
+      showToast('error', 'Failed to load replies')
+    }
+  }
+
+  const handleReplySubmit = async (e, parentId) => {
+    e.preventDefault()
+    if (!replyContent.trim()) return
+
+    setSubmittingReply(true)
+    try {
+      const reply = await commentService.createComment(id, {
+        content: replyContent,
+        parentCommentId: parentId
+      })
+      setReplies(prev => ({
+        ...prev,
+        [parentId]: [...(prev[parentId] || []), reply]
+      }))
+      setComments(prev => prev.map(c => 
+        c.id === parentId ? { ...c, replyCount: (c.replyCount || 0) + 1 } : c
+      ))
+      setReplyingTo(null)
+      setReplyContent('')
+      setShowReplies(prev => ({ ...prev, [parentId]: true }))
+    } catch (error) {
+      console.error('Failed to create reply', error)
+      showToast('error', error.response?.data?.message || 'Failed to post reply.')
+    } finally {
+      setSubmittingReply(false)
+    }
+  }
+
+  const handleToggleLikeReply = async (replyId, parentId) => {
+    if (!isAuthenticated) {
+      showToast('warning', 'Please login to like comments')
+      return;
+    }
+    try {
+      const result = await commentService.toggleLike(replyId);
+      setReplies(prev => ({
+        ...prev,
+        [parentId]: (prev[parentId] || []).map(r => 
+          r.id === replyId ? { ...r, likeCount: result.likeCount, liked: result.liked } : r
+        )
+      }));
+      // Remove dislike if liking
+      if (result.liked) {
+        setDislikedComments(prev => {
+          const next = new Set(prev)
+          next.delete(`reply-${replyId}`)
+          return next
+        })
+      }
+    } catch (error) {
+      console.error('Failed to toggle like', error);
+    }
+  };
+
+  const handleToggleDislike = async (commentId) => {
+    if (!isAuthenticated) {
+      showToast('warning', 'Please login to dislike comments')
+      return;
+    }
+    // If currently liked, unlike first
+    const isRealComment = !String(commentId).startsWith('reply-')
+    const currentComment = isRealComment ? comments.find(c => c.id === commentId) : null
+    if (currentComment?.liked) {
+      try {
+        const result = await commentService.toggleLike(commentId);
+        setComments(prev => prev.map(c => 
+          c.id === commentId ? { ...c, likeCount: result.likeCount, liked: false } : c
+        ));
+      } catch (e) { /* ignore */ }
+    }
+    // For reply likes, find and unlike
+    if (!isRealComment) {
+      const realReplyId = parseInt(String(commentId).replace('reply-', ''))
+      for (const [parentId, replyList] of Object.entries(replies)) {
+        const reply = replyList?.find(r => r.id === realReplyId)
+        if (reply?.liked) {
+          try {
+            const result = await commentService.toggleLike(realReplyId);
+            setReplies(prev => ({
+              ...prev,
+              [parentId]: (prev[parentId] || []).map(r => 
+                r.id === realReplyId ? { ...r, likeCount: result.likeCount, liked: false } : r
+              )
+            }));
+          } catch (e) { /* ignore */ }
+          break
+        }
+      }
+    }
+    setDislikedComments(prev => {
+      const next = new Set(prev)
+      if (next.has(commentId)) {
+        next.delete(commentId)
+      } else {
+        next.add(commentId)
+      }
+      return next
+    })
+  };
 
   return (
     <section className="watch">
@@ -349,11 +491,11 @@ const Watch = () => {
           <svg className="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24">
             <defs>
               <linearGradient id="crownGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#f59e0b"/>
-                <stop offset="100%" stopColor="#d97706"/>
+                <stop offset="0%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#d97706" />
               </linearGradient>
             </defs>
-            <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z" fill="url(#crownGrad)"/>
+            <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z" fill="url(#crownGrad)" />
           </svg>
           <h3 className="text-2xl font-bold text-white mb-2">Premium Content</h3>
           <p className="text-gray-400 mb-6">
@@ -365,43 +507,42 @@ const Watch = () => {
             style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', boxShadow: '0 4px 14px rgba(245,158,11,0.3)' }}
           >
             <span className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z" /></svg>
               Upgrade to Premium
             </span>
           </button>
         </div>
       ) : movie?.isLocked ? (
         <div className="watch__locked flex flex-col items-center justify-center p-20 bg-[#15161b] rounded-xl border border-gray-800 text-center">
-          <svg className="w-16 h-16 text-gray-500 mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+          <svg className="w-16 h-16 text-gray-500 mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" /></svg>
           <h3 className="text-2xl font-bold text-white mb-2">Not Yet Released</h3>
           <p className="text-gray-400">
             This movie will be available on {new Date(movie.releaseDate).toLocaleString('en-US')}
           </p>
         </div>
       ) : embedUrl ? (
-        <div 
+        <div
           ref={playerWrapperRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={() => isPlaying && setControlsVisible(false)}
-          className="watch__player relative group overflow-hidden bg-black rounded-3xl border border-white/10 select-none w-full aspect-video"
+          className="watch__player relative group overflow-hidden bg-black rounded-3xl border border-white/10 select-none w-full max-w-5xl mx-auto aspect-video shadow-2xl"
         >
           {/* Lớp phủ trong suốt chặn mọi tương tác chuột trực tiếp vào iframe của YouTube */}
-          <div 
+          <div
             onClick={handlePlayPause}
             className="absolute inset-0 z-10 bg-transparent cursor-pointer"
           ></div>
 
           {/* Vùng trình phát của YouTube API (chặn tất cả chuột) */}
-          <div 
-            id="yt-player" 
+          <div
+            id="yt-player"
             className="w-full h-full pointer-events-none"
           ></div>
 
           {/* Bộ điều khiển phát phim tùy chỉnh */}
-          <div 
-            className={`absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/95 via-black/75 to-transparent p-6 flex flex-col gap-4 transition-opacity duration-300 ${
-              controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
+          <div
+            className={`absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/95 via-black/75 to-transparent p-6 flex flex-col gap-4 transition-opacity duration-300 ${controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
           >
             {/* Thanh tua thời gian (Seek Bar) */}
             <div className="flex items-center w-full">
@@ -419,8 +560,8 @@ const Watch = () => {
             <div className="flex items-center justify-between w-full text-white">
               {/* Nút bên trái */}
               <div className="flex items-center gap-6">
-                <button 
-                  onClick={handlePlayPause} 
+                <button
+                  onClick={handlePlayPause}
                   className="focus:outline-none hover:text-[#E50914] transition-colors flex items-center justify-center"
                 >
                   <span className="material-symbols-outlined text-[32px] leading-none">
@@ -437,8 +578,8 @@ const Watch = () => {
               <div className="flex items-center gap-6">
                 {/* Âm lượng */}
                 <div className="flex items-center gap-2 group/volume">
-                  <button 
-                    onClick={handleToggleMute} 
+                  <button
+                    onClick={handleToggleMute}
                     className="focus:outline-none hover:text-[#E50914] transition-colors flex items-center justify-center"
                   >
                     <span className="material-symbols-outlined text-[22px] leading-none">
@@ -456,8 +597,8 @@ const Watch = () => {
                 </div>
 
                 {/* Toàn màn hình */}
-                <button 
-                  onClick={handleToggleFullscreen} 
+                <button
+                  onClick={handleToggleFullscreen}
                   className="focus:outline-none hover:text-[#E50914] transition-colors flex items-center justify-center"
                 >
                   <span className="material-symbols-outlined text-[22px] leading-none">
@@ -500,26 +641,30 @@ const Watch = () => {
               </div>
             ) : (
               <div className="mb-8 flex gap-4">
-                <div className="w-10 h-10 shrink-0 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-300 text-sm mt-1">
-                  {user?.username?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
-                
-                <form 
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="Avatar" className="w-10 h-10 shrink-0 rounded-full object-cover mt-1" />
+                ) : (
+                  <div className="w-10 h-10 shrink-0 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-300 text-sm mt-1">
+                    {user?.username?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                )}
+
+                <form
                   className="flex-1 flex flex-col gap-3"
                   onSubmit={handleCommentSubmit}
                 >
                   {/* Comment Input */}
                   <div className="relative">
-                    <textarea 
+                    <textarea
                       className="w-full bg-[#242730] border border-[#2a2d36] rounded-xl p-4 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-red-500/50 resize-none min-h-[80px] text-sm transition-colors"
                       placeholder="Add a comment..."
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       maxLength={1000}
                     />
-                    
+
                     <div className="absolute bottom-3 right-3 flex items-center gap-4">
-                      <button 
+                      <button
                         type="submit"
                         disabled={submitting || !newComment.trim()}
                         className="bg-red-600 hover:bg-red-700 text-white px-5 py-1.5 rounded-full font-medium text-xs disabled:opacity-50 transition-colors shadow-lg"
@@ -539,34 +684,57 @@ const Watch = () => {
                   <p className="text-gray-500 text-sm">No comments yet</p>
                 </div>
               ) : (
-                comments.map((comment, index) => (
-                  <div key={comment.id || index} className="flex gap-4 py-5 border-b border-gray-800/50 last:border-0">
+                comments.map((commentItem, index) => (
+                  <div key={commentItem.id || index} className="flex gap-4 py-5 border-b border-gray-800/50 last:border-0">
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-[#242730] flex items-center justify-center font-bold text-gray-400 text-lg border border-gray-700">
-                        {comment.authorName?.charAt(0)?.toUpperCase() || 'U'}
-                      </div>
+                      {commentItem.authorAvatarUrl ? (
+                        <img src={commentItem.authorAvatarUrl} alt="Avatar" className="w-12 h-12 rounded-full object-cover border border-gray-700" />
+                      ) : commentItem.authorName === user?.username && user?.avatarUrl ? (
+                        <img src={user.avatarUrl} alt="Avatar" className="w-12 h-12 rounded-full object-cover border border-gray-700" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-[#242730] flex items-center justify-center font-bold text-gray-400 text-lg border border-gray-700">
+                          {commentItem.authorName?.charAt(0)?.toUpperCase() || 'U'}
+                        </div>
+                      )}
                       <div className="text-[10px] text-gray-500 text-center mt-1 uppercase font-semibold tracking-wider">
                         Wall
                       </div>
                     </div>
-                    
+
                     <div className="flex-1">
                       <div className="flex items-baseline gap-2 mb-2">
-                        <h4 className="font-bold text-gray-200 text-[15px]">{comment.authorName || 'Anonymous user'}</h4>
+                        <h4 className="font-bold text-gray-200 text-[15px]">{commentItem.authorName || 'Anonymous user'}</h4>
                         <span className="text-xs text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">Lv.1 - Beginner</span>
                       </div>
-                      
+
                       <div className="text-gray-300 text-[15px] leading-relaxed whitespace-pre-wrap mb-3">
-                        {comment.content}
+                        {commentItem.content}
                       </div>
-                      
+
                       <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <button className="flex items-center gap-1 hover:text-white transition-colors">
-                          <svg className="w-4 h-4" fill={comment.liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
+                        <button 
+                          onClick={() => handleToggleLike(commentItem.id)}
+                          className={`flex items-center gap-1.5 transition-colors ${commentItem.liked ? 'text-blue-400' : 'hover:text-white'}`}
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                          <span>{commentItem.likeCount || ''}</span>
+                        </button>
+                        <button 
+                          onClick={() => handleToggleDislike(commentItem.id)}
+                          className={`flex items-center gap-1.5 transition-colors ${dislikedComments.has(commentItem.id) ? 'text-red-400' : 'hover:text-white'}`}
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
+                          <span>{dislikedComments.has(commentItem.id) ? 1 : ''}</span>
+                        </button>
+                        <button 
+                          onClick={() => setReplyingTo(replyingTo === commentItem.id ? null : commentItem.id)}
+                          className="flex items-center ml-2 hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider"
+                        >
+                          Reply
                         </button>
                         <span>
-                          {comment.createdAt ? (() => {
-                            const date = new Date(comment.createdAt);
+                          {commentItem.createdAt ? (() => {
+                            const date = new Date(commentItem.createdAt);
                             const now = new Date();
                             const diffTime = Math.abs(now - date);
                             const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
@@ -576,11 +744,102 @@ const Watch = () => {
                           })() : 'Just now'}
                         </span>
                       </div>
+
+                      {/* View Replies Button */}
+                      {commentItem.replyCount > 0 && (
+                        <div className="mt-3">
+                          <button 
+                            onClick={() => handleLoadReplies(commentItem.id)}
+                            className="text-[13px] text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 font-medium"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                            {showReplies[commentItem.id] ? 'Hide replies' : `View ${commentItem.replyCount} replies`}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Reply Input */}
+                      {replyingTo === commentItem.id && (
+                        <div className="mt-4">
+                          <form onSubmit={(e) => handleReplySubmit(e, commentItem.id)}>
+                            <textarea
+                              className="w-full bg-[#1a1c22] border border-gray-800 rounded-xl p-3 text-gray-200 focus:outline-none focus:border-red-500/50 resize-none min-h-[60px] text-[13px]"
+                              placeholder="Write a reply..."
+                              value={replyContent}
+                              onChange={(e) => setReplyContent(e.target.value)}
+                            />
+                            <div className="flex justify-end gap-2 mt-2">
+                              <button 
+                                type="button"
+                                onClick={() => setReplyingTo(null)}
+                                className="px-3 py-1 text-xs font-medium text-gray-400 hover:text-white transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button 
+                                type="submit"
+                                disabled={submittingReply || !replyContent.trim()}
+                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-full font-medium text-xs disabled:opacity-50"
+                              >
+                                {submittingReply ? 'Replying...' : 'Reply'}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+
+                      {/* Replies List */}
+                      {showReplies[commentItem.id] && replies[commentItem.id] && (
+                        <div className="mt-4 flex flex-col gap-5 pl-5 ml-[22px] border-l-2 border-red-900/40">
+                          {replies[commentItem.id].map(reply => (
+                            <div key={reply.id} className="flex gap-3">
+                              <div className="w-8 h-8 rounded-full bg-[#242730] border border-gray-700 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-400">
+                                {reply.authorName?.charAt(0)?.toUpperCase() || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-baseline gap-2 mb-1">
+                                  <h5 className="font-bold text-gray-200 text-[13px]">{reply.authorName || 'Anonymous'}</h5>
+                                </div>
+                                <div className="text-gray-400 text-[13px] leading-relaxed mb-2">
+                                  {reply.content}
+                                </div>
+                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                  <button 
+                                    onClick={() => handleToggleLikeReply(reply.id, commentItem.id)}
+                                    className={`flex items-center gap-1.5 transition-colors ${reply.liked ? 'text-blue-400' : 'hover:text-white'}`}
+                                  >
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                                    <span>{reply.likeCount || ''}</span>
+                                  </button>
+                                  <button 
+                                    onClick={() => handleToggleDislike(`reply-${reply.id}`)}
+                                    className={`flex items-center gap-1.5 transition-colors ${dislikedComments.has(`reply-${reply.id}`) ? 'text-red-400' : 'hover:text-white'}`}
+                                  >
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
+                                    <span>{dislikedComments.has(`reply-${reply.id}`) ? 1 : ''}</span>
+                                  </button>
+                                  <span>
+                                    {reply.createdAt ? (() => {
+                                      const date = new Date(reply.createdAt);
+                                      const now = new Date();
+                                      const diffTime = Math.abs(now - date);
+                                      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+                                      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                                      if (diffHours < 24) return `${diffHours || 1} h`;
+                                      return `${diffDays} d`;
+                                    })() : 'Just now'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
               )}
-              
+
               {comments.length > 0 && (
                 <button className="w-full mt-6 bg-[#1a1c22] hover:bg-[#242730] text-gray-300 py-3 rounded-lg font-medium transition-colors text-sm border border-gray-800">
                   Load more comments
@@ -601,33 +860,30 @@ const Watch = () => {
               </svg>
               <h3 className="text-xl font-bold">Related movies</h3>
             </div>
-            
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {relatedMovies.slice(0, 12).map((relMovie) => (
-                <Link 
-                  key={relMovie.id} 
+                <Link
+                  key={relMovie.id}
                   to={`/movie/${relMovie.id}`}
                   className="group relative rounded-lg overflow-hidden block bg-[#242730] aspect-[2/3]"
                 >
-                  <img 
-                    src={relMovie.posterPath ? (relMovie.posterPath.startsWith('http') ? relMovie.posterPath : `https://image.tmdb.org/t/p/w500${relMovie.posterPath}`) : 'https://via.placeholder.com/500x750?text=No+Poster'} 
+                  <img
+                    src={relMovie.posterPath ? (relMovie.posterPath.startsWith('http') ? relMovie.posterPath : `https://image.tmdb.org/t/p/w500${relMovie.posterPath}`) : 'https://via.placeholder.com/500x750?text=No+Poster'}
                     alt={relMovie.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  
+
                   {/* Overlay on hover */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white">
                       <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
+                        <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
                   </div>
 
-                  {/* Top left badge */}
-                  <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                    TV/??
-                  </div>
+
 
                   {/* Bottom right rating */}
                   {relMovie.rating && (
@@ -649,7 +905,7 @@ const Watch = () => {
           </div>
         </div>
       )}
-      
+
       <ToastContainer toasts={toasts} onClose={closeToast} />
     </section>
   )
