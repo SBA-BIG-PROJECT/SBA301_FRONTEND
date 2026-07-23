@@ -143,6 +143,21 @@ const AdminUserDetail = () => {
         );
     };
 
+    const getPaymentStatusColor = (status) => {
+        switch (status?.toUpperCase()) {
+            case 'SUCCESS':
+                return 'bg-[#7bd0ff]/20 border border-[#7bd0ff] text-[#7bd0ff]';
+            case 'PENDING':
+                return 'bg-amber-500/20 border border-amber-500 text-amber-400';
+            case 'FAILED':
+            case 'CANCELLED':
+                return 'bg-red-500/20 border border-red-500 text-[#ffb4ab]';
+            case 'EXPIRED':
+            default:
+                return 'bg-[#334155]/50 border border-[#334155] text-[#94A3B8]';
+        }
+    };
+
     const handleRestore = () => {
         requestConfirm(
             'Restore User',
@@ -433,11 +448,7 @@ const AdminUserDetail = () => {
                                                         <td className="p-[16px] text-[#f8fafc]">{payment.planType}</td>
                                                         <td className="p-[16px] text-[#f8fafc] font-semibold">${payment.amount}</td>
                                                         <td className="p-[16px] text-right">
-                                                            <span className={`inline-flex items-center justify-center px-[8px] py-[2px] rounded text-[12px] font-medium uppercase ${
-                                                                payment.status === 'SUCCESS' 
-                                                                    ? 'bg-[#7bd0ff]/20 border border-[#7bd0ff] text-[#7bd0ff]' 
-                                                                    : 'bg-red-500/20 border border-red-500 text-[#ffb4ab]'
-                                                            }`}>
+                                                            <span className={`inline-flex items-center justify-center px-[8px] py-[2px] rounded text-[12px] font-medium uppercase ${getPaymentStatusColor(payment.status)}`}>
                                                                 {payment.status}
                                                             </span>
                                                         </td>

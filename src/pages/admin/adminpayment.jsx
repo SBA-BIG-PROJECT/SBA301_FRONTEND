@@ -241,6 +241,7 @@ const AdminPayment = () => {
                       <option value="pending">Pending</option>
                       <option value="failed">Failed</option>
                       <option value="cancelled">Cancelled</option>
+                      <option value="expired">Expired</option>
                     </select>
                     <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">expand_more</span>
                   </div>
