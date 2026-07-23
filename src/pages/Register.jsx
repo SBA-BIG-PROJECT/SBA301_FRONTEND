@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../services'
+import { useToast, ToastContainer } from '../components/Toast.jsx'
 
 const Register = () => {
+  const { toasts, showToast, closeToast } = useToast()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,11 +26,17 @@ const Register = () => {
         password
       })
       
-      // Register success, navigate to login
-      navigate('/login')
+      showToast('success', 'Registration successful! Redirecting...')
+      
+      // Delay navigation to let the user see the toast
+      setTimeout(() => {
+        navigate('/login')
+      }, 1500)
     } catch (err) {
       console.error('Registration error:', err)
-      setError(err.response?.data?.message || 'Registration failed. Please try again.')
+      const errMsg = err.response?.data?.message || 'Registration failed. Please try again.'
+      setError(errMsg)
+      showToast('error', errMsg)
     } finally {
       setIsLoading(false)
     }
@@ -115,6 +123,7 @@ const Register = () => {
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>
+      <ToastContainer toasts={toasts} onClose={closeToast} />
     </section>
   )
 }
