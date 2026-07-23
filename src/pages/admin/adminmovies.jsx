@@ -28,6 +28,7 @@ const AdminMovies = () => {
   // Filters
   const [search, setSearch] = useState('');
   const [isActive, setIsActive] = useState('all');
+  const [isPremium, setIsPremium] = useState('all');
 
   // Movie Form Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -116,8 +117,9 @@ const AdminMovies = () => {
       setError(null);
       const searchParam = search ? search : undefined;
       const activeParam = isActive !== 'all' ? (isActive === 'active') : undefined;
+      const premiumParam = isPremium !== 'all' ? (isPremium === 'premium') : undefined;
       
-      const data = await adminService.getAllMovies(page, size, searchParam, activeParam);
+      const data = await adminService.getAllMovies(page, size, searchParam, activeParam, premiumParam);
       setMovies(data?.content || []);
       setTotalPages(data?.totalPages || 0);
       setTotalElements(data?.totalElements || 0);
@@ -288,15 +290,26 @@ const AdminMovies = () => {
     }
   };
 
-  const handleTogglePremium = async (tmdbId, currentPremium) => {
-    try {
-      await adminService.setMoviePremium(tmdbId, !currentPremium);
-      showToast('success', `Movie marked as ${!currentPremium ? 'Premium' : 'Standard'} successfully!`);
-      fetchMovies();
-    } catch (err) {
-      console.error('Error toggling premium status:', err);
-      showToast('error', err?.response?.data?.message || 'Failed to update premium status.');
-    }
+  const handleTogglePremium = (tmdbId, currentPremium) => {
+    setConfirmModal({
+      isOpen: true,
+      title: !currentPremium ? 'Upgrade to Premium' : 'Remove Premium Status',
+      message: `Are you sure you want to ${!currentPremium ? 'upgrade this movie to Premium' : 'change this movie back to Standard (Free)'}?`,
+      action: async () => {
+        try {
+          await adminService.setMoviePremium(tmdbId, !currentPremium);
+          showToast('success', `Movie marked as ${!currentPremium ? 'Premium' : 'Standard'} successfully!`);
+          fetchMovies();
+        } catch (err) {
+          console.error('Error toggling premium status:', err);
+          showToast('error', err?.response?.data?.message || 'Failed to update premium status.');
+        } finally {
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        }
+      },
+      confirmText: !currentPremium ? 'Upgrade' : 'Remove Premium',
+      confirmColor: !currentPremium ? 'bg-amber-600 shadow-amber-600/20 hover:bg-amber-500' : 'bg-blue-600 shadow-blue-600/20 hover:bg-blue-500'
+    });
   };
 
   return (
@@ -380,6 +393,17 @@ const AdminMovies = () => {
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">arrow_drop_down</span>
+                </div>
+                <div className="relative w-full max-w-[150px]">
+                  <select 
+                    value={isPremium}
+                    onChange={(e) => setIsPremium(e.target.value)}
+                    className="bg-[#0F172A] border border-[#334155] text-[14px] text-[#f8fafc] rounded-lg pl-[16px] pr-[36px] py-[8px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] w-full outline-none appearance-none cursor-pointer">
+                    <option value="all">All Types</option>
+                    <option value="premium">Premium</option>
+                    <option value="free">Free / Normal</option>
                   </select>
                   <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">arrow_drop_down</span>
                 </div>

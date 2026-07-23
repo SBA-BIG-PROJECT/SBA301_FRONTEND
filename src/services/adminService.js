@@ -81,10 +81,11 @@ const adminService = {
 
   // === Movie Management ===
   // Backend: MovieController @RequestMapping("/api/v1/movies"), admin sub-paths under /admin
-  getAllMovies: async (page = 0, size = 20, search, isActive) => {
+  getAllMovies: async (page = 0, size = 20, search, isActive, isPremium) => {
     const params = { page, size };
     if (search) params.search = search;
     if (isActive !== undefined) params.isActive = isActive;
+    if (isPremium !== undefined) params.isPremium = isPremium;
     
     const response = await api.get('/movies/admin', { params });
     return response.data;
