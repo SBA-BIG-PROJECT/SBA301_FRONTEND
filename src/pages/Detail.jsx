@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import Spinner from '../components/Spinner.jsx'
 import heroImg from '../assets/hero-img.png'
 import noPoster from '../assets/No-Poster.svg'
-import { movieService, reviewService, commentService } from '../services'
+import { movieService, reviewService } from '../services'
 import { useWatchlist } from '../hooks/useWatchlist'
 import PosterCard from '../components/PosterCard.jsx'
 import { useToast, ToastContainer } from '../components/Toast.jsx'
@@ -23,7 +23,7 @@ const Detail = () => {
   const [showTrailer, setShowTrailer] = useState(false)
   const [trailerEmbedUrl, setTrailerEmbedUrl] = useState('')
   const [relatedMovies, setRelatedMovies] = useState([])
-  const [comments, setComments] = useState([])
+  const [reviews, setReviews] = useState([])
   const [myReview, setMyReview] = useState(null)
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -31,12 +31,11 @@ const Detail = () => {
   
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist()
   
-  // Review & Comment states
-  const [newComment, setNewComment] = useState('')
+  // Review states
+  const [reviewText, setReviewText] = useState('')
   const [newRating, setNewRating] = useState(5.0)
   const [hoverRating, setHoverRating] = useState(0)
-  const [submittingRating, setSubmittingRating] = useState(false)
-  const [submittingComment, setSubmittingComment] = useState(false)
+  const [submittingReview, setSubmittingReview] = useState(false)
 
   const extractVideoID = (url) => {
     if (!url) return '';
@@ -82,13 +81,11 @@ const Detail = () => {
         }
         
         try {
-          const cms = await commentService.getRootComments(id, { page: 0, size: 20 });
-          if (active) setComments(cms.content || []);
+          const revs = await reviewService.getReviews(id, { page: 0, size: 20 });
+          if (active) setReviews(revs.content || []);
         } catch (e) {
-          console.error('Failed to load comments', e);
+          console.error('Failed to load reviews', e);
         }
-
-
       } catch (error) {
         console.error(`Error fetching details: ${error}`)
         if (active) {
@@ -114,6 +111,7 @@ const Detail = () => {
           if (active && rev) {
             setMyReview(rev);
             setNewRating(rev.rating / 2);
+            if (rev.comment) setReviewText(rev.comment);
           }
         })
         .catch(e => console.error('Failed to load user review', e));
@@ -181,50 +179,32 @@ const Detail = () => {
     }
   }
 
-  const handleRatingSubmit = async (e) => {
+  const handleReviewSubmit = async (e) => {
     if (e) e.preventDefault()
-    setSubmittingRating(true)
+    setSubmittingReview(true)
     try {
       if (myReview) {
         const review = await reviewService.updateReview(myReview.id, {
           rating: newRating * 2,
-          comment: myReview.comment // Keep existing comment on review, though we might not use it anymore
+          comment: reviewText
         })
         setMyReview(review)
-        showToast('success', 'Rating updated successfully!')
+        setReviews(prev => prev.map(r => r.id === review.id ? review : r))
+        showToast('success', 'Review updated successfully!')
       } else {
         const review = await reviewService.createReview(id, {
           rating: newRating * 2,
-          comment: 'Rated from UI'
+          comment: reviewText
         })
         setMyReview(review)
-        showToast('success', 'Rating posted successfully!')
+        setReviews(prev => [review, ...prev])
+        showToast('success', 'Review posted successfully!')
       }
     } catch (error) {
-      console.error('Failed to submit rating', error)
-      showToast('error', error.response?.data?.message || 'Failed to post rating. Please try again.')
+      console.error('Failed to submit review', error)
+      showToast('error', error.response?.data?.message || 'Failed to post review. Please try again.')
     } finally {
-      setSubmittingRating(false)
-    }
-  }
-
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault()
-    if (!newComment.trim()) return
-    
-    setSubmittingComment(true)
-    try {
-      const comment = await commentService.createComment(id, {
-        content: newComment
-      })
-      setComments(prev => [comment, ...prev])
-      setNewComment('')
-      showToast('success', 'Comment posted successfully!')
-    } catch (error) {
-      console.error('Failed to create comment', error)
-      showToast('error', error.response?.data?.message || 'Failed to post comment. Please try again.')
-    } finally {
-      setSubmittingComment(false)
+      setSubmittingReview(false)
     }
   }
 
@@ -484,107 +464,96 @@ const Detail = () => {
       {/* Reviews and Comments */}
       <div id="review-section" className="detail__reviews mt-10">
         <div className="row__header mb-6">
-          <h2>Discussion</h2>
+          <h2>Reviews</h2>
         </div>
         
         {!user ? (
           <div className="mb-8">
             <Link to="/login" className="inline-flex items-center gap-2 bg-[#242730] hover:bg-[#2a2d36] text-gray-300 px-6 py-3 rounded-lg text-sm font-medium transition-colors">
-              <span>➜</span> Login to rate and discuss
+              <span>➜</span> Login to rate and review
             </Link>
           </div>
         ) : (
           <div className="mb-8 flex flex-col gap-6 bg-dark-100/50 p-6 rounded-2xl border border-white/5">
-            {/* Rating Section */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-gray-400">Your Rating:</span>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setNewRating(star)}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      className="focus:outline-none transition-transform hover:scale-110"
-                    >
-                      <svg 
-                        className={`w-6 h-6 ${star <= (hoverRating || newRating) ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]' : 'text-gray-600'} transition-all`} 
-                        fill="currentColor" 
-                        viewBox="0 0 20 20"
+            <form onSubmit={handleReviewSubmit}>
+              {/* Rating Section */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-gray-400">Your Rating:</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setNewRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="focus:outline-none transition-transform hover:scale-110"
                       >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                      </svg>
-                    </button>
-                  ))}
+                        <svg 
+                          className={`w-6 h-6 ${star <= (hoverRating || newRating) ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]' : 'text-gray-600'} transition-all`} 
+                          fill="currentColor" 
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <button 
-                type="button"
-                onClick={handleRatingSubmit}
-                disabled={submittingRating}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg font-medium text-sm disabled:opacity-50 transition-colors"
-              >
-                {submittingRating ? 'Saving...' : (myReview ? 'Update Rating' : 'Save Rating')}
-              </button>
-            </div>
 
-            {/* Comment Section */}
-            <form onSubmit={handleCommentSubmit} className="relative mt-2">
-              <textarea 
-                className="w-full bg-[#15161b] border border-white/10 rounded-xl p-4 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-red-500/50 resize-none min-h-[100px] text-sm transition-colors"
-                placeholder="Write a comment to join the discussion..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                maxLength={5000}
-              />
-              <button 
-                type="submit"
-                disabled={submittingComment || !newComment.trim()}
-                className="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-medium text-sm disabled:opacity-50 transition-colors shadow-lg"
-              >
-                {submittingComment ? 'Posting...' : 'Post Comment'}
-              </button>
+              {/* Review Text Section */}
+              <div className="relative mt-4">
+                <textarea 
+                  className="w-full bg-[#15161b] border border-white/10 rounded-xl p-4 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-red-500/50 resize-none min-h-[100px] text-sm transition-colors"
+                  placeholder="Write your review here..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  maxLength={5000}
+                />
+                <button 
+                  type="submit"
+                  disabled={submittingReview}
+                  className="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-medium text-sm disabled:opacity-50 transition-colors shadow-lg"
+                >
+                  {submittingReview ? 'Saving...' : (myReview ? 'Update Review' : 'Post Review')}
+                </button>
+              </div>
             </form>
           </div>
         )}
 
-        {comments.length > 0 ? (
+        {reviews.length > 0 ? (
           <div className="detail__reviews-list grid gap-4 lg:grid-cols-2">
-            {comments.map(comment => (
-              <div key={comment.id} className="review-card">
+            {reviews.map(review => (
+              <div key={review.id} className="review-card">
                 <div className="review-card__header">
                   <div className="review-card__avatar">
                     <div className="review-card__avatar-placeholder">
-                      {comment.authorName ? comment.authorName.charAt(0).toUpperCase() : 'U'}
+                      {review.authorName ? review.authorName.charAt(0).toUpperCase() : 'U'}
                     </div>
                   </div>
                   <div className="review-card__meta">
-                    <h4>{comment.authorName || 'Anonymous'}</h4>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {new Date(comment.createdAt).toLocaleDateString()} {comment.edited && '(edited)'}
+                    <h4>{review.authorName || 'Anonymous'}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex text-yellow-400 text-xs">
+                        {[...Array(5)].map((_, i) => (
+                          <svg key={i} className={`w-3 h-3 ${i < Math.floor(review.rating / 2) ? 'text-yellow-400' : 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {new Date(review.createdAt).toLocaleDateString()} {review.edited && '(edited)'}
+                      </span>
                     </div>
                   </div>
                 </div>
-                <p className="review-card__content">{comment.content}</p>
-                <div className="flex items-center gap-4 mt-4 text-sm text-gray-400">
-                  <button className="flex items-center gap-1 hover:text-white transition-colors">
-                    <svg className="w-4 h-4" fill={comment.liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.514"></path></svg>
-                    <span>{comment.likeCount}</span>
-                  </button>
-                  {comment.replyCount > 0 && (
-                    <button className="flex items-center gap-1 hover:text-white transition-colors">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-                      <span>{comment.replyCount} Replies</span>
-                    </button>
-                  )}
-                </div>
+                {review.comment && <p className="review-card__content mt-3 text-sm text-gray-300">{review.comment}</p>}
               </div>
             ))}
           </div>
         ) : (
-          <p className="search-results__empty">No comments yet. Be the first to start the discussion!</p>
+          <p className="search-results__empty">No reviews yet. Be the first to rate and review!</p>
         )}
       </div>
 
