@@ -32,7 +32,7 @@ const Login = () => {
 
       // Login success, redirect to home or dashboard
       if (isAdmin) {
-        navigate('/admin/dashboard')
+        navigate('/admin/dashboard', { replace: true })
       } else {
         navigate(from, { replace: true })
       }
