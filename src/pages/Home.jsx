@@ -194,7 +194,7 @@ const MovieCard = ({ movie, onNavigate, showToast }) => {
                   }
                   try {
                     await watchlistService.addToWatchlist(movie.id);
-                    showToast('success', 'Added to watchlist successfully!');
+                    window.dispatchEvent(new CustomEvent('notifications-refresh'));
                   } catch (err) {
                     showToast('error', err.response?.data?.message || err.message || 'Error adding to watchlist');
                   }
@@ -423,7 +423,7 @@ const Home = () => {
                 }
                 try {
                   await watchlistService.addToWatchlist(heroMovie.id);
-                  showToast('success', 'Added to watchlist successfully!');
+                  window.dispatchEvent(new CustomEvent('notifications-refresh'));
                 } catch (err) {
                   showToast('error', err.response?.data?.message || err.message || 'Error adding to watchlist');
                 }

@@ -116,7 +116,7 @@ const Payment = () => {
                 </div>
               </div>
               <div className="mt-8">
-                <span className="text-4xl font-bold text-white">100,000 VND</span>
+                <span className="text-4xl font-bold text-white">29,000 VND</span>
                 <span className="text-gray-400"> / month</span>
               </div>
             </div>
@@ -143,7 +143,7 @@ const Payment = () => {
                 </div>
               </div>
               <div className="mt-8">
-                <span className="text-4xl font-bold text-white">1,000,000 VND</span>
+                <span className="text-4xl font-bold text-white">100,000 VND</span>
                 <span className="text-gray-400"> / year</span>
               </div>
             </div>
