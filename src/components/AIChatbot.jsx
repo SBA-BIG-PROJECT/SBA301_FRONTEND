@@ -14,6 +14,12 @@ const isVietnamese = () => {
   return lang.startsWith('vi')
 }
 
+const isTextVietnamese = (text) => {
+  if (!text) return isVietnamese()
+  const viChars = /[àáãạảăằắẵặẳâầấẫậẩèéẽẹẻêềếễệểìíĩịỉòóõọỏôồốỗộổơờớỡợởùúũụủưừứữựửỳýỹỵỷđ]/i
+  return viChars.test(text)
+}
+
 const SUGGESTIONS_VI = [
   'Gợi ý phim đang hot 🔥',
   'Tìm phim hành động hay',
@@ -407,8 +413,8 @@ const MovieRecommendationCard = ({
                 }}
               >
                 {isReasonExpanded
-                  ? (isVietnamese() ? 'thu gọn' : 'less')
-                  : (isVietnamese() ? 'thêm' : 'more')}
+                  ? (isTextVietnamese(reasonText) ? 'Thu gọn' : 'Less')
+                  : (isTextVietnamese(reasonText) ? 'Xem thêm' : 'More')}
               </button>
             )}
           </div>
