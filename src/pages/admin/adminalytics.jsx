@@ -41,8 +41,8 @@ const AdminAnalytics = () => {
   };
 
   const formatCurrency = (amount) => {
-    if (!amount && amount !== 0) return '$0.00';
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    if (!amount && amount !== 0) return '$0';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
   };
 
   const TMDB_IMG = 'https://image.tmdb.org/t/p/w92';
