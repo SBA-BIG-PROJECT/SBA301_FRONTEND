@@ -371,43 +371,50 @@ const AdminMovies = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap items-center gap-[16px] bg-[#1E293B] p-[16px] rounded-lg border border-[#334155] shadow-sm">
-              <div className="relative flex-1 min-w-[260px] max-w-md group">
-                <span className="material-symbols-outlined absolute left-[8px] top-1/2 -translate-y-1/2 text-[#94A3B8] text-[20px] group-focus-within:text-[#E50914] transition-colors">search</span>
+            <div className="flex flex-wrap items-center justify-between gap-[16px] bg-[#1E293B] p-[16px] rounded-lg border border-[#334155] shadow-sm">
+              <div className="relative flex-1 min-w-[240px] max-w-md group">
+                <span className="material-symbols-outlined absolute left-[12px] top-1/2 -translate-y-1/2 text-[#94A3B8] text-[20px] group-focus-within:text-[#E50914] transition-colors">search</span>
                 <input 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
-                  className="w-full bg-[#0F172A] border border-[#334155] rounded-lg pl-[32px] pr-[16px] py-[8px] text-[14px] leading-[20px] text-[#f8fafc] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-all" 
+                  className="w-full bg-[#0F172A] border border-[#334155] rounded-lg pl-[36px] pr-[16px] h-[38px] text-[14px] leading-[20px] text-[#f8fafc] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-all" 
                   placeholder="Search movies by title..." 
                   type="text"
                 />
               </div>
-              <div className="flex items-center gap-[8px] min-w-[200px]">
-                <span className="material-symbols-outlined text-[#94A3B8] text-[20px]">filter_list</span>
-                <div className="relative w-full max-w-[150px]">
-                  <select 
-                    value={isActive}
-                    onChange={(e) => setIsActive(e.target.value)}
-                    className="bg-[#0F172A] border border-[#334155] text-[14px] text-[#f8fafc] rounded-lg pl-[16px] pr-[36px] py-[8px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] w-full outline-none appearance-none cursor-pointer">
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">arrow_drop_down</span>
+              <div className="flex flex-wrap items-center gap-[12px]">
+                <div className="flex items-center gap-[8px]">
+                  <span className="material-symbols-outlined text-[#94A3B8] text-[20px]">filter_list</span>
+                  <div className="relative w-[140px]">
+                    <select 
+                      value={isActive}
+                      onChange={(e) => setIsActive(e.target.value)}
+                      className="bg-[#0F172A] border border-[#334155] text-[14px] text-[#f8fafc] rounded-lg pl-[12px] pr-[32px] h-[38px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] w-full outline-none appearance-none cursor-pointer">
+                      <option value="all">All Status</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">arrow_drop_down</span>
+                  </div>
+                  <div className="relative w-[140px]">
+                    <select 
+                      value={isPremium}
+                      onChange={(e) => setIsPremium(e.target.value)}
+                      className="bg-[#0F172A] border border-[#334155] text-[14px] text-[#f8fafc] rounded-lg pl-[12px] pr-[32px] h-[38px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] w-full outline-none appearance-none cursor-pointer">
+                      <option value="all">All Types</option>
+                      <option value="premium">Premium</option>
+                      <option value="free">Free / Normal</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">arrow_drop_down</span>
+                  </div>
                 </div>
-                <div className="relative w-full max-w-[150px]">
-                  <select 
-                    value={isPremium}
-                    onChange={(e) => setIsPremium(e.target.value)}
-                    className="bg-[#0F172A] border border-[#334155] text-[14px] text-[#f8fafc] rounded-lg pl-[16px] pr-[36px] py-[8px] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] w-full outline-none appearance-none cursor-pointer">
-                    <option value="all">All Types</option>
-                    <option value="premium">Premium</option>
-                    <option value="free">Free / Normal</option>
-                  </select>
-                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">arrow_drop_down</span>
-                </div>
-                <button onClick={handleApplyFilters} className="bg-[#E50914] hover:brightness-110 active:brightness-90 text-white px-4 py-2 rounded-lg text-sm transition-all font-medium ml-2">Apply Filters</button>
+                <button 
+                  onClick={handleApplyFilters} 
+                  className="bg-[#E50914] hover:brightness-110 active:scale-[0.98] text-white px-[18px] h-[38px] rounded-lg text-[14px] font-medium transition-all whitespace-nowrap shrink-0 flex items-center justify-center gap-[6px] shadow-sm shadow-red-900/30 cursor-pointer">
+                  <span className="material-symbols-outlined text-[18px]">filter_alt</span>
+                  Apply Filters
+                </button>
               </div>
             </div>
 
