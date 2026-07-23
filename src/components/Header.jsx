@@ -102,12 +102,23 @@ const Header = () => {
 
   useEffect(() => {
     let active = true
-    if (isLoggedIn) {
-      userService.getCurrentUserProfile().then(data => {
-        if (active) setProfile(data)
-      }).catch(() => {})
+    const fetchProfile = () => {
+      if (isLoggedIn) {
+        userService.getCurrentUserProfile().then(data => {
+          if (active) setProfile(data)
+        }).catch(() => {})
+      }
     }
-    return () => { active = false }
+    fetchProfile()
+    
+    // Re-fetch profile when premium status changes (after payment)
+    const handlePremiumUpdate = () => fetchProfile()
+    window.addEventListener('premium-updated', handlePremiumUpdate)
+    
+    return () => {
+      active = false
+      window.removeEventListener('premium-updated', handlePremiumUpdate)
+    }
   }, [isLoggedIn])
 
   useEffect(() => {

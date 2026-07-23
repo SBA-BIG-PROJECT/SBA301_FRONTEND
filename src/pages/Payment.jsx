@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { paymentService } from '../services';
+import { paymentService, userService } from '../services';
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -32,6 +32,19 @@ const Payment = () => {
              if (res.data.status === 'SUCCESS' || res.data.paid) {
                setPaymentStatus('SUCCESS');
                clearInterval(intervalId);
+
+               // Re-fetch latest user profile and update localStorage
+               try {
+                 const updatedProfile = await userService.getCurrentUserProfile();
+                 const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                 const mergedUser = { ...currentUser, isPremium: updatedProfile.isPremium, premiumExpiresAt: updatedProfile.premiumExpiresAt };
+                 localStorage.setItem('user', JSON.stringify(mergedUser));
+                 setUser(mergedUser);
+                 // Notify Header to re-fetch profile
+                 window.dispatchEvent(new CustomEvent('premium-updated'));
+               } catch (profileErr) {
+                 console.error('Error refreshing user profile after payment', profileErr);
+               }
              }
           }
         } catch (err) {
